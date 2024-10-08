@@ -283,7 +283,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
     content,
     icon: Icon,
     isDarkMode,
-    data, // Pass the entire data object for the bill/law/amendment
+    data,
   }) => (
     <motion.div
       className={`w-80 h-56 ${
@@ -365,7 +365,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           <h2 className="text-2xl font-semibold grow text-center pt-8">
             Recent Bills
           </h2>
-          <div>
+          <div className="flex items-center"> 
             <button
               className={`mr-4 ${
                 isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
@@ -385,7 +385,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           </div>
         </div>
         <div className="relative px-4">
-          <div className="flex space-x-6">
+          <div className="flex justify-center space-x-6"> 
             {billsData.map(
               (bill, index) =>
                 visibleBills.includes(index) && (
@@ -414,7 +414,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           <h2 className="text-2xl font-semibold grow text-center">
             Recent Laws
           </h2>
-          <div>
+          <div className="flex items-center"> 
             <button
               className={`mr-4 ${
                 isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
@@ -434,7 +434,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           </div>
         </div>
         <div className="relative px-4">
-          <div className="flex space-x-6">
+          <div className="flex justify-center space-x-6"> 
             {lawsData.map(
               (law, index) =>
                 visibleLaws.includes(index) && (
@@ -463,7 +463,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           <h2 className="text-2xl font-semibold grow text-center">
             Recent Amendments
           </h2>
-          <div>
+          <div className="flex items-center"> 
             <button
               className={`mr-4 ${
                 isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
@@ -483,7 +483,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           </div>
         </div>
         <div className="relative px-4">
-          <div className="flex space-x-6">
+          <div className="flex justify-center space-x-6">
             {amendmentsData.map(
               (amendment, index) =>
                 visibleAmendments.includes(index) && (

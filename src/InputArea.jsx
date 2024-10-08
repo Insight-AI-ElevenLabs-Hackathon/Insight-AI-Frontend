@@ -7,64 +7,57 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
   const [inputValue, setInputValue] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [timeRange, setTimeRange] = useState("");
-  const [Number, setNumber] = useState(""); // Renamed to avoid conflict with built-in Number
+  const [billNumber, setBillNumber] = useState("");
   const [originHouse, setOriginHouse] = useState("");
-  const [type, setType] = useState("");
+  const [docType, setDocType] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
+  const [showPopup, setShowPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const formRef = useRef(null);
   const navigate = useNavigate();
 
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-      // Simulate API call to fetch search results
-      const results = await fetchSearchResults(
-        inputValue,
-        timeRange,
-        Number,
-        originHouse,
-        type,
-      );
-      setSearchResults(results);
-      setShowPopup(true); // Show popup instead of inline results
+      setIsLoading(true);
+
+      try {
+        const response = await fetch(
+          "https://search.insight-ai.workers.dev/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: inputValue,
+              time_range: timeRange,
+              origin: originHouse,
+              doc_type: docType,
+              bill_number: billNumber,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data);
+        } else {
+          console.error("Error fetching search results:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+      } finally {
+        setIsLoading(false);
+        setShowPopup(true);
+      }
     },
-    [inputValue, timeRange, Number, originHouse, type],
+    [inputValue, timeRange, billNumber, originHouse, docType]
   );
 
-  const fetchSearchResults = async (
-    query,
-    timeRange,
-    number,
-    originHouse,
-    type,
-  ) => {
-    // Replace with your actual API call
-    // This is a placeholder that returns dummy data
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
-    return [
-      {
-        id: 1,
-        title: "Bill 123 - Infrastructure Investment",
-        content: "This bill focuses on...",
-      },
-      {
-        id: 2,
-        title: "Law 456 - Tax Reform Act",
-        content: "This law implements changes...",
-      },
-      {
-        id: 3,
-        title: "Amendment 789 - Education Funding",
-        content: "This amendment proposes...",
-      },
-    ];
-  };
-
   const handleResultClick = (resultId) => {
-    // Navigate to the conversation page (replace '/conversation/:id' with your actual route)
     navigate(`/conversation/${resultId}`);
-    setShowPopup(false); // Close popup on result click
+    setShowPopup(false);
   };
 
   const handleFocus = () => {
@@ -75,7 +68,7 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
     const handleClickOutside = (event) => {
       if (formRef.current && !formRef.current.contains(event.target)) {
         setShowFilters(false);
-        setShowPopup(false); // Hide popup when clicking outside
+        setShowPopup(false);
       }
     };
 
@@ -86,7 +79,7 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
   }, []);
 
   return (
-    <div className="w-full max-w-2xl relative">
+    <div className="w-full max-w-3xl relative"> 
       <motion.form
         ref={formRef}
         initial={{ opacity: 0, y: 20 }}
@@ -166,16 +159,16 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                     }`}
                   >
                     <option value="">Select Time Range</option>
-                    <option value="1month">1 Month</option>
-                    <option value="3months">3 Months</option>
-                    <option value="6months">6 Months</option>
-                    <option value="12months">12 Months</option>
+                    <option value="1m">1 Month</option>
+                    <option value="3m">3 Months</option>
+                    <option value="6m">6 Months</option>
+                    <option value="12m">12 Months</option>
                   </select>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <label
-                    htmlFor="Number"
+                    htmlFor="billNumber"
                     className={`flex items-center text-sm font-medium whitespace-nowrap ${
                       isDarkMode ? "text-gray-300" : "text-gray-700"
                     }`}
@@ -185,15 +178,15 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                   </label>
                   <input
                     type="text"
-                    id="Number"
-                    value={Number}
-                    onChange={(e) => setNumber(e.target.value)}
+                    id="billNumber"
+                    value={billNumber}
+                    onChange={(e) => setBillNumber(e.target.value)}
                     className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
                         ? "bg-gray-600 text-gray-300 border-gray-500"
                         : "bg-white text-gray-700 border-gray-300"
                     }`}
-                    placeholder="Bill/Law/Amendment number"
+                    placeholder="Bill/Law number"
                   />
                 </div>
 
@@ -219,14 +212,14 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                     }`}
                   >
                     <option value="">Select Origin</option>
-                    <option value="senate">Senate</option>
-                    <option value="house">House</option>
+                    <option value="House">House</option>
+                    <option value="Senate">Senate</option>
                   </select>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <label
-                    htmlFor="type"
+                    htmlFor="docType"
                     className={`flex items-center text-sm font-medium whitespace-nowrap ${
                       isDarkMode ? "text-gray-300" : "text-gray-700"
                     }`}
@@ -235,9 +228,9 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                     Type:
                   </label>
                   <select
-                    id="type"
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
+                    id="docType"
+                    value={docType}
+                    onChange={(e) => setDocType(e.target.value)}
                     className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
                         ? "bg-gray-600 text-gray-300 border-gray-500"
@@ -245,9 +238,9 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                     }`}
                   >
                     <option value="">Select Type</option>
-                    <option value="bill">Bill</option>
-                    <option value="law">Law</option>
-                    <option value="amendment">Amendment</option>
+                    <option value="Bill">Bill</option>
+                    <option value="Law">Law</option>
+                    {/* Add more document types as needed */}
                   </select>
                 </div>
               </div>
@@ -271,49 +264,73 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className={`w-full max-w-md p-6 rounded-lg shadow-lg bg-white ${
+              className={`w-full max-w-3xl p-8 rounded-lg shadow-lg bg-white overflow-y-auto max-h-[80vh] ${ 
                 isDarkMode
                   ? "bg-gray-800 border-gray-700"
                   : "bg-white border-gray-300"
               }`}
             >
               <h2
-                className={`text-xl font-semibold mb-4 ${
+                className={`text-2xl font-semibold mb-6 ${
                   isDarkMode ? "text-gray-300" : "text-gray-800"
                 }`}
               >
                 Search Results
               </h2>
-              {searchResults.map((result) => (
+              {isLoading && (
+                <div className="flex justify-center items-center h-full"> 
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div> 
+                </div>
+              )}
+              {!isLoading && searchResults.map((result) => (
                 <motion.div
-                  key={result.id}
+                  key={result.packageId}
                   whileHover={{ scale: 1.02 }}
-                  className={`px-4 py-3 cursor-pointer border-b ${
+                  className={`px-6 py-4 cursor-pointer border-b group ${ 
                     isDarkMode ? "border-gray-700" : "border-gray-200"
                   }`}
                   onClick={() => {
-                    handleResultClick(result.id);
+                    handleResultClick(result.packageId);
                     setShowPopup(false);
                   }}
                 >
                   <h3
-                    className={`text-lg font-medium ${
+                    className={`text-xl font-medium mb-2 transition-colors group-hover:text-blue-500 ${ 
                       isDarkMode ? "text-gray-300" : "text-gray-800"
                     }`}
                   >
                     {result.title}
                   </h3>
                   <p
-                    className={`text-sm ${
+                    className={`text-base ${
                       isDarkMode ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    {result.content}
+                    {/* You might want to display more relevant information here */}
+                    {/* For example: result.dateIssued, result.governmentAuthor, etc. */}
+                    {/* Adjust based on the data you want to show */}
+                    {/* Example: */}
+                    {result.dateIssued && (
+                      <span>
+                        <strong>Date Issued:</strong> {result.dateIssued}
+                      </span>
+                    )}
                   </p>
+                  {/* You can add more details here based on your data */}
+                  {result.origin && (
+                    <span className="block text-sm text-gray-500 mt-1">
+                      <strong>Origin:</strong> {result.origin}
+                    </span>
+                  )}
+                  {result.docType && (
+                    <span className="block text-sm text-gray-500 mt-1">
+                      <strong>Type:</strong> {result.docType}
+                    </span>
+                  )}
                 </motion.div>
               ))}
               <button
-                className={`mt-4 px-4 py-2 rounded-md text-sm font-medium ${
+                className={`mt-6 px-6 py-3 rounded-md text-base font-medium ${
                   isDarkMode
                     ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
