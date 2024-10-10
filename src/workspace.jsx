@@ -5,6 +5,7 @@ import {
   Routes,
   useNavigate,
   useLocation,
+  useParams,
 } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import Sidebar from "./Sidebar";
@@ -28,7 +29,7 @@ import {
   SignInButton,
   SignUpButton,
 } from "@clerk/clerk-react";
-import InputArea from "./InputArea"; // Import the InputArea component
+import InputArea from "./InputArea";
 
 // Create a context to store the selected bill/law/amendment data
 export const SelectedItemDataContext = createContext(null);
@@ -215,11 +216,13 @@ const Header = React.memo(({ isDarkMode }) => (
 
 const HomePage = React.memo(({ isDarkMode }) => {
   const navigate = useNavigate();
-  const { setSelectedItemData } = useContext(SelectedItemDataContext); // Access the context
+  const { setSelectedItemData } = useContext(SelectedItemDataContext);
 
   const handleSubmit = useCallback(
     (inputValue, uploadedFiles) => {
       const conversationId = uuidv4();
+      // Save conversation ID to localStorage
+      localStorage.setItem("conversationId", conversationId);
       navigate(`/conversation/${conversationId}`);
     },
     [navigate]
@@ -278,6 +281,30 @@ const HomePage = React.memo(({ isDarkMode }) => {
     fetchData();
   }, []);
 
+  // Modified InfoCard onClick handler
+  const handleInfoCardClick = async (data) => {
+    try {
+      const response = await fetch('https://uid-generator.insight-ai.workers.dev/', { // Replace with your worker route
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: JSON.stringify(data) }),
+      });
+
+      if (response.ok) {
+        const { uid } = await response.json();
+        localStorage.setItem("selectedItemData", JSON.stringify(data));
+        setSelectedItemData(data);
+        navigate(`/conversation/${uid}`);
+      } else {
+        console.error('Error generating UID:', response.status);
+        // Handle error appropriately (e.g., show an error message to the user)
+      }
+    } catch (error) {
+      console.error('Error generating UID:', error);
+      // Handle error appropriately
+    }
+  };
+
   const InfoCard = ({
     title,
     content,
@@ -296,10 +323,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
         boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
       }}
       transition={{ duration: 0.2 }}
-      onClick={() => {
-        setSelectedItemData(data); // Set the selected item data in the context
-        navigate(`/conversation/${uuidv4()}`);
-      }}
+      onClick={() => handleInfoCardClick(data)} // Use the modified handler
       style={{ cursor: "pointer" }}
     >
       <div>
@@ -316,6 +340,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
             >
               {key === "Congress" && <Building2 className="mr-2" size={16} />}
               {key === "Bill Number" && <Hash className="mr-2" size={16} />}
+              {key === "Law Number" && <Hash className="mr-2" size={16} />}
               {key === "Origin House" && <Scale className="mr-2" size={16} />}
               {key === "Last Updated" && (
                 <Calendar className="mr-2" size={16} />
@@ -365,7 +390,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           <h2 className="text-2xl font-semibold grow text-center pt-8">
             Recent Bills
           </h2>
-          <div className="flex items-center"> 
+          <div className="flex items-center">
             <button
               className={`mr-4 ${
                 isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
@@ -385,7 +410,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           </div>
         </div>
         <div className="relative px-4">
-          <div className="flex justify-center space-x-6"> 
+          <div className="flex justify-center space-x-6">
             {billsData.map(
               (bill, index) =>
                 visibleBills.includes(index) && (
@@ -414,7 +439,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           <h2 className="text-2xl font-semibold grow text-center">
             Recent Laws
           </h2>
-          <div className="flex items-center"> 
+          <div className="flex items-center">
             <button
               className={`mr-4 ${
                 isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
@@ -434,7 +459,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           </div>
         </div>
         <div className="relative px-4">
-          <div className="flex justify-center space-x-6"> 
+          <div className="flex justify-center space-x-6">
             {lawsData.map(
               (law, index) =>
                 visibleLaws.includes(index) && (
@@ -443,7 +468,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
                     title={law.title}
                     content={{
                       Congress: `${law.congress}th`,
-                      "Bill Number": law.number,
+                      "Law Number": law.number,
                       "Origin House": law.type === "S" ? "Senate" : "House",
                       "Last Updated": law.updateDate,
                     }}
@@ -456,58 +481,10 @@ const HomePage = React.memo(({ isDarkMode }) => {
           </div>
         </div>
       </div>
-
-      {/* Recent Amendments Section */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold grow text-center">
-            Recent Amendments
-          </h2>
-          <div className="flex items-center"> 
-            <button
-              className={`mr-4 ${
-                isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
-              }`}
-              onClick={() => handleAmendmentNavigation(-1)}
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button
-              className={`${
-                isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
-              }`}
-              onClick={() => handleAmendmentNavigation(1)}
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
-        </div>
-        <div className="relative px-4">
-          <div className="flex justify-center space-x-6">
-            {amendmentsData.map(
-              (amendment, index) =>
-                visibleAmendments.includes(index) && (
-                  <InfoCard
-                    key={index}
-                    title={amendment.title}
-                    content={{
-                      Type: "Amendment",
-                      Number: amendment.number || "N/A",
-                      "Affected Bill": amendment.affectedBill || "N/A",
-                      "Proposed Date": amendment.proposedDate || "N/A",
-                    }}
-                    icon={FileText}
-                    isDarkMode={isDarkMode}
-                    data={amendment} // Pass the entire amendment object
-                  />
-                )
-            )}
-          </div>
-        </div>
-      </div>
     </motion.div>
   );
 });
+
 
 const SignOutContent = () => (
   <div className="flex-grow p-8 flex flex-col items-center justify-center">
