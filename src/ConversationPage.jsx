@@ -24,7 +24,6 @@ import { SelectedItemDataContext } from "./workspace";
 import ReactMarkdown from "react-markdown";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Helper functions outside the component scope
 function convertTimeToSeconds(time) {
   const [hours, minutes, secondsAndMilliseconds] = time.split(":");
   const [seconds, milliseconds] = secondsAndMilliseconds.split(",");
@@ -47,13 +46,12 @@ function parseSRT(srtString) {
       if (startTime && endTime) {
         const text = parts.slice(2).join("\n");
 
-        // Decode the text using UTF-8 encoding
         const decodedText = decodeURIComponent(escape(text));
 
         subtitles.push({
           start: convertTimeToSeconds(startTime),
           end: convertTimeToSeconds(endTime),
-          text: decodedText, // Use the decoded text
+          text: decodedText,
         });
       }
     }
@@ -140,7 +138,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(true);
 
-  // Language code mapping
   const languageCodes = {
     English: "en", Chinese: "zh",Spanish: "es",Hindi: "hi",Portuguese: "pt",French: "fr",German: "de",Japanese: "ja",
     Arabic: "ar",Russian: "ru",Korean: "ko",Indonesian: "id",Italian: "it",Dutch: "nl",Turkish: "tr",Polish: "pl",Swedish: "sv",
@@ -227,11 +224,10 @@ const ConversationPage = ({ isDarkMode, transition }) => {
     if (audioRef.current?.paused) {
       audioRef.current.play();
       setIsPlaying(true);
-      setShowSubtitles(true); // Show subtitles when play starts
+      setShowSubtitles(true);
     } else {
       audioRef.current?.pause();
       setIsPlaying(false);
-      // setShowSubtitles(true); // You can optionally hide subtitles on pause
     }
   };
 
@@ -276,14 +272,13 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         title="Origin Chamber"
         content={data.origin_chamber}
       />
-      {/* Official Texts card spans 2 rows */}
       <InfoCard
         icon={<Shield className="text-red-500" />}
         title="Official Texts"
         pdf_link={data.pdf_link}
         htm_link={data.htm_link}
-        colSpan={1} // Span one column
-        rowSpan={2} // Span two rows
+        colSpan={1}
+        rowSpan={2}
       />
       <InfoCard
         icon={<FileText className="text-orange-500" />}
@@ -295,7 +290,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         title="Sponsor  "
         content={`${data.sponsor} (${data.sponsor_party}-${data.sponsor_state})`}
       >
-        {/* Sponsor ID Tag with Link */}
         <a
           href={`https://www.google.com/search?q=${encodeURIComponent(
             data.sponsor
@@ -307,14 +301,12 @@ const ConversationPage = ({ isDarkMode, transition }) => {
           {data.sponsor_id}
         </a>
       </InfoCard>
-  
-      {/* Summary card spans 3 columns */}
       <div className="md:col-span-3 md:row-span-1"> 
         <InfoCard
           icon={<Globe className="text-teal-500" />}
           title="Summary"
           content={data.summary}
-          fullWidth // This ensures it takes up full width
+          fullWidth
         />
       </div>
     </div>
@@ -358,7 +350,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
     children,
     fullWidth = false,
     colSpan, 
-    rowSpan, // Add rowSpan prop
+    rowSpan,
     pdf_link,
     htm_link,
   }) => {
@@ -392,7 +384,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
               {children}
             </h4>
           </div>
-          {/* Buttons to open PDF and HTML - Side by Side */}
           {(pdf_link || htm_link) && (
             <div className="mt-4 flex space-x-2"> 
               {pdf_link && (
@@ -500,7 +491,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         setIsAudioLoading(false);
       }
     } else if (newLanguage === "English" && jsonData && jsonData.srt_path) {
-      // Load English subtitles if they exist
 
       newAudioSrc = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${jsonData.audio_path}`; // English audio URL
 
@@ -529,11 +519,9 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         setIsAudioLoading(false);
       }
     } else {
-      // No subtitles available
       setSubtitles([]);
     }
 
-    // Set the audio source and reload ONLY ONCE
     if (newAudioSrc) {
       audioRef.current.src = newAudioSrc;
       audioRef.current.load();
@@ -551,9 +539,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         isDarkMode ? "bg-gray-900 text-gray-200" : "bg-white text-gray-800"
       )}
     >
-      {/* Main content area */}
       <div className="lg:w-2/3 p-5 pt-7 overflow-y-auto"> 
-        {/* Bill/Law/Amendment Details */}
         <Card
           className={clsx(
             "mb-7 overflow-hidden transition-all duration-300", 
@@ -580,7 +566,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
             </div>
 
             {isDataFetching ? (
-              // Loading screen for main info card
               <div className="text-center p-8">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
                 <p className="mt-4 text-lg">Fetching data...</p>
@@ -614,7 +599,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         </Card>
       </div>
 
-      {/* Audio player on the right - Fixed Position with two cards */}
       <div
         className={clsx(
           "lg:w-1/3 lg:fixed lg:top-10 lg:right-0 lg:bottom-0 p-5 pt-7 flex flex-col overflow-y-auto", 
@@ -623,7 +607,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
       >
         <audio ref={audioRef} src="/placeholder.mp3" /> 
 
-        {/* Card for title and subtitles */}
         <Card
           className={clsx(
             "flex-grow flex flex-col mb-5 overflow-hidden  transition-all duration-300", 
@@ -682,7 +665,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
               )}
             </div>
 
-            {/* Subtitle toggle button */}
             <Button
               variant="ghost"
               size="icon"
@@ -706,7 +688,6 @@ const ConversationPage = ({ isDarkMode, transition }) => {
           </CardContent>
         </Card>
 
-        {/* Card for player controls */}
         <Card
           className={clsx(
             "flex flex-col overflow-hidden transition-all duration-300", 

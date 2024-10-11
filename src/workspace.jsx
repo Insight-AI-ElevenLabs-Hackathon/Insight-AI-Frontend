@@ -25,7 +25,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import ConversationPage from "./ConversationPage";
 
-// Create a context to store the selected bill/law/amendment data
 export const SelectedItemDataContext = createContext(null);
 
 const WorkspaceContent = () => {
@@ -34,7 +33,7 @@ const WorkspaceContent = () => {
   );
   const [showFooterPopup, setShowFooterPopup] = useState(false);
   const [footerPopupContent, setFooterPopupContent] = useState("");
-  const [selectedItemData, setSelectedItemData] = useState(null); // State for selected item data
+  const [selectedItemData, setSelectedItemData] = useState(null);
   const footerPopupRef = useRef(null);
   const location = useLocation();
 
@@ -163,7 +162,6 @@ const Workspace = () => {
   );
 };
 
-// Header component with Link to homepage
 const Header = React.memo(({ isDarkMode }) => (
   <header
     className={`flex justify-between items-center px-3 py-1.5 border-b fixed top-0 left-0 right-0 z-50 ${
@@ -188,7 +186,6 @@ const HomePage = React.memo(({ isDarkMode }) => {
   const navigate = useNavigate();
   const { setSelectedItemData } = useContext(SelectedItemDataContext);
 
-  // State to manage the visible cards and data for each section
   const [visibleBills, setVisibleBills] = useState([0, 1, 2, 3]);
   const [visibleLaws, setVisibleLaws] = useState([0, 1, 2, 3]);
   const [visibleAmendments, setVisibleAmendments] = useState([0, 1, 2, 3]);
@@ -241,7 +238,6 @@ const HomePage = React.memo(({ isDarkMode }) => {
     fetchData();
   }, []);
 
-  // Modified InfoCard onClick handler to add conversation to history
   const handleInfoCardClick = async (data) => {
     try {
       const response = await fetch('https://uid-generator.insight-ai.workers.dev/', { 
@@ -255,7 +251,6 @@ const HomePage = React.memo(({ isDarkMode }) => {
         localStorage.setItem("selectedItemData", JSON.stringify(data));
         setSelectedItemData(data);
 
-        // Add the new conversation to the history:
         const newConversation = {
           id: uid,
           title: data.title,
@@ -272,7 +267,6 @@ const HomePage = React.memo(({ isDarkMode }) => {
     }
   };
 
-  // Function to update the conversation history in localStorage
   const updateConversationHistory = (newConversation) => {
     const storedConversations = localStorage.getItem('conversations');
     let conversations = [];
@@ -362,8 +356,6 @@ const HomePage = React.memo(({ isDarkMode }) => {
           <InputArea isDarkMode={isDarkMode} /> 
         </div>
       </div>
-
-      {/* Recent Bills Section */}
       <div className="mb-12"> 
         <div className="flex items-center justify-between mb-4"> 
           <h2 className="text-xl font-semibold grow text-center pt-6">
@@ -411,8 +403,6 @@ const HomePage = React.memo(({ isDarkMode }) => {
           </div>
         </div>
       </div>
-
-      {/* Recent Laws Section */}
       <div className="mb-12"> 
         <div className="flex items-center justify-between mb-4"> 
           <h2 className="text-xl font-semibold grow text-center">
@@ -482,7 +472,7 @@ const InputArea = ({ isDarkMode }) => {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-      setIsLoading(true); // Set isLoading to true when submitting
+      setIsLoading(true);
 
       try {
         const response = await fetch(
@@ -519,10 +509,9 @@ const InputArea = ({ isDarkMode }) => {
   );
 
   const handleResultClick = async (result) => {
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
 
     try {
-      // 1. Generate a UID for the conversation first
       const uidResponse = await fetch('https://uid-generator.insight-ai.workers.dev/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -531,21 +520,17 @@ const InputArea = ({ isDarkMode }) => {
 
       if (uidResponse.ok) {
         const { uid } = await uidResponse.json();
-
-        // 2. Parse the search result into the InfoCard format
         const parsedResult = {
           title: result.title,
-          congress: result.packageId.split('-')[1].slice(0, 3), // Extract congress from packageId (e.g., "118" from "BILLS-118hr9773ih")
-          number: result.packageId.split('-').pop().replace(/[^0-9]/g, ''), // Extract number from packageId (e.g., "9773" from "BILLS-118hr9773ih")
-          type: result.origin === "House" ? "HR" : "S", // Assuming "origin" field maps to "type"
-          updateDate: result.lastModified.split('T')[0], // Extract date from lastModified
+          congress: result.packageId.split('-')[1].slice(0, 3),
+          number: result.packageId.split('-').pop().replace(/[^0-9]/g, ''),
+          type: result.origin === "House" ? "HR" : "S",
+          updateDate: result.lastModified.split('T')[0],
           url: result.resultLink,
         };
 
-        // 3. Set selected item data using the parsed result
         setSelectedItemData(parsedResult);
 
-        // Add the new conversation to the history:
         const newConversation = {
           id: uid,
           title: result.title,
@@ -553,24 +538,19 @@ const InputArea = ({ isDarkMode }) => {
         };
         updateConversationHistory(newConversation); 
 
-        // 4. Navigate to the conversation page
         navigate(`/conversation/${uid}`);
 
-        // 5. Fetch additional data in ConversationPage (as before)
       } else {
         console.error('Error generating UID:', uidResponse.status);
-        // Handle error appropriately
       }
     } catch (error) {
       console.error('Error handling search result click:', error);
-      // Handle error appropriately
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
       setShowPopup(false);
     }
   };
 
-  // Function to update the conversation history in localStorage (same as in HomePage)
   const updateConversationHistory = (newConversation) => {
     const storedConversations = localStorage.getItem('conversations');
     let conversations = [];
@@ -663,7 +643,6 @@ const InputArea = ({ isDarkMode }) => {
               }`}
             >
               <div className="grid grid-cols-2 gap-3 py-1"> 
-                {/* Row 1 */}
                 <div className="flex items-center space-x-2"> 
                   <label
                     htmlFor="timeRange"
@@ -715,8 +694,6 @@ const InputArea = ({ isDarkMode }) => {
                     placeholder="Bill/Law number"
                   />
                 </div>
-
-                {/* Row 2 */}
                 <div className="flex items-center space-x-2"> 
                   <label
                     htmlFor="originHouse"
@@ -892,7 +869,6 @@ const InputArea = ({ isDarkMode }) => {
   );
 };
 
-// Sidebar component with History navigation
 const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
 
@@ -905,7 +881,7 @@ const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
     { 
       Icon: Flag, 
       tooltip: "Feedback", 
-      onClick: () => navigate('/feedback') // Navigate to /feedback 
+      onClick: () => navigate('/feedback')
     },
   ];
 
@@ -936,7 +912,6 @@ const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
         ))}
       </div>
 
-      {/* Light/Dark Mode Switch */}
       <div className="absolute bottom-10 flex flex-col items-center left-0 w-full p-2"> 
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -958,7 +933,6 @@ const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
   );
 };
 
-// HistoryPage component
 const HistoryPage = ({ isDarkMode }) => {
   const [conversations, setConversations] = useState([]);
 
@@ -1010,7 +984,6 @@ const HistoryPage = ({ isDarkMode }) => {
       ) : (
         <ul className="space-y-3"> 
           {conversations.map((conversation) => (
-            // Use conversation.id as the key:
             <li key={conversation.id} className={`p-3 rounded-lg shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}> 
               <p>
                 <strong>{conversation.title}</strong> 
@@ -1025,17 +998,15 @@ const HistoryPage = ({ isDarkMode }) => {
   );
 };
 
-// Improved FeedbackPage component with slider for rating and centered layout
 const FeedbackPage = ({ isDarkMode }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [rating, setRating] = useState(3); // Initial rating value
+  const [rating, setRating] = useState(3);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically send the feedback to your server or API
     console.log("Feedback submitted:", { name, email, feedback, rating });
     setSubmitted(true);
   };
