@@ -265,7 +265,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
   };
 
   const renderBillContent = (data) => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
       <InfoCard
         icon={<Calendar className="text-blue-500" />}
         title="Introduced Date"
@@ -276,12 +276,14 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         title="Origin Chamber"
         content={data.origin_chamber}
       />
+      {/* Official Texts card spans 2 rows */}
       <InfoCard
         icon={<Shield className="text-red-500" />}
         title="Official Texts"
         pdf_link={data.pdf_link}
         htm_link={data.htm_link}
-        colSpan={2} // Span two columns on medium and larger screens
+        colSpan={1} // Span one column
+        rowSpan={2} // Span two rows
       />
       <InfoCard
         icon={<FileText className="text-orange-500" />}
@@ -305,20 +307,21 @@ const ConversationPage = ({ isDarkMode, transition }) => {
           {data.sponsor_id}
         </a>
       </InfoCard>
-
-      <div className="md:col-span-3 md:row-span-2">
+  
+      {/* Summary card spans 3 columns */}
+      <div className="md:col-span-3 md:row-span-1"> 
         <InfoCard
           icon={<Globe className="text-teal-500" />}
           title="Summary"
           content={data.summary}
-          fullWidth
+          fullWidth // This ensures it takes up full width
         />
       </div>
     </div>
   );
 
   const renderLawContent = (data) => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
       <InfoCard
         icon={<Calendar className="text-blue-500" />}
         title="Date Issued"
@@ -330,9 +333,12 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         content={data.law_type}
       />
       <InfoCard
-        icon={<FileText className="text-orange-500" />}
-        title="Policy Area"
-        content={data.policy_area}
+        icon={<Shield className="text-red-500" />}
+        title="Official Texts"
+        pdf_link={data.pdf_link}
+        htm_link={data.htm_link}
+        colSpan={1}
+        rowSpan={1}
       />
       <div className="md:col-span-3 md:row-span-2">
         <InfoCard
@@ -351,7 +357,8 @@ const ConversationPage = ({ isDarkMode, transition }) => {
     content,
     children,
     fullWidth = false,
-    colSpan, // Add colSpan prop
+    colSpan, 
+    rowSpan, // Add rowSpan prop
     pdf_link,
     htm_link,
   }) => {
@@ -370,45 +377,53 @@ const ConversationPage = ({ isDarkMode, transition }) => {
     return (
       <Card
         className={clsx(
-          "overflow-hidden transition-all duration-300 hover:shadow-lg",
+          "overflow-hidden transition-all duration-300 hover:shadow-md",
           isDarkMode ? "bg-gray-900 border border-gray-700" : "bg-white border border-gray-200",
           fullWidth && "md:col-span-3",
-          colSpan && `md:col-span-${colSpan}` // Apply colSpan dynamically
+          colSpan && `md:col-span-${colSpan}`,
+          rowSpan && `md:row-span-${rowSpan}`
         )}
       >
-        <CardContent className="p-6">
-          <div className="flex items-center mb-3">
-            {React.cloneElement(icon, { className: "w-6 h-6 mr-3" })}
-            <h4 className="font-semibold text-xl flex items-center mr-4">
+        <CardContent className="p-5">
+          <div className="flex items-center mb-2">
+            {React.cloneElement(icon, { className: "w-5 h-5 mr-2" })}
+            <h4 className="font-semibold text-lg flex items-center mr-3">
               {title}
               {children}
             </h4>
           </div>
-          {/* Buttons to open PDF and HTML */}
+          {/* Buttons to open PDF and HTML - Side by Side */}
           {(pdf_link || htm_link) && (
-            <div className="mt-4">
+            <div className="mt-4 flex space-x-2"> 
               {pdf_link && (
-                <div className="mb-2">
-                  <h5 className="font-medium text-lg">PDF:</h5>
-                  <Button variant="outline" onClick={handleOpenPdf}>
-                    Open PDF
-                  </Button>
-                </div>
+                <Button variant="outline" onClick={handleOpenPdf}>
+                  Open PDF
+                </Button>
               )}
               {htm_link && (
-                <div>
-                  <h5 className="font-medium text-lg">HTML:</h5>
-                  <Button variant="outline" onClick={handleOpenHtm}>
-                    Open HTML
-                  </Button>
-                </div>
+                <Button variant="outline" onClick={handleOpenHtm}>
+                  Open HTML
+                </Button>
               )}
             </div>
+          )}
+          {(pdf_link || htm_link) && (
+            <p className="mt-2 pt-4 text-sm text-center text-gray-500 dark:text-gray-400">
+              The links are extracted from api.govinfo.gov, for more detailed information, please visit{" "}
+              <a
+                href="https://www.govinfo.gov/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline" 
+              >
+                govinfo.gov
+              </a>
+            </p>
           )}
           {content && (
             <ReactMarkdown
               className={clsx(
-                "text-base",
+                "text-sm",
                 isDarkMode ? "text-gray-300" : "text-gray-600"
               )}
             >
@@ -537,29 +552,29 @@ const ConversationPage = ({ isDarkMode, transition }) => {
       )}
     >
       {/* Main content area */}
-      <div className="lg:w-2/3 p-6 pt-8 overflow-y-auto">
+      <div className="lg:w-2/3 p-5 pt-7 overflow-y-auto"> 
         {/* Bill/Law/Amendment Details */}
         <Card
           className={clsx(
-            "mb-8 overflow-hidden transition-all duration-300",
+            "mb-7 overflow-hidden transition-all duration-300", 
             isDarkMode ? "bg-gray-900 border border-gray-700" : "bg-white border border-gray-200"
           )}
         >
-          <CardContent className="p-8">
-            <div className="flex items-center mb-6">
-              <h2 className="text-4xl font-bold mr-4">
+          <CardContent className="p-7"> 
+            <div className="flex items-center mb-5"> 
+              <h2 className="text-3xl font-bold mr-3"> 
                 {selectedItemData.title}
               </h2>
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <span className="px-2 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800"> 
                 {selectedItemData.type}.{selectedItemData.number}
               </span>
             </div>
-            <div className="flex items-center space-x-4 text-gray-600 mb-8">
-              <span className="text-lg font-semibold flex items-center">
-                <Building2 className="w-5 h-5 inline-block mr-2 text-blue-500" />
+            <div className="flex items-center space-x-3 text-gray-600 mb-7"> 
+              <span className="text-base font-semibold flex items-center">
+                <Building2 className="w-4 h-4 inline-block mr-1 text-blue-500" /> 
                 {selectedItemData.congress}th Congress
               </span>
-              <span className="px-3 py-1 rounded-full bg-gray-200 text-gray-800 text-sm font-medium">
+              <span className="px-2 py-0.5 rounded-full bg-gray-200 text-gray-800 text-xs font-medium"> 
                 Last Updated: {selectedItemData.updateDate}
               </span>
             </div>
@@ -577,8 +592,8 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                   : renderLawContent(jsonData)}
               </div>
             ) : (
-              <div className="text-center p-8 flex flex-col items-center bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm">
-                <div className="flex items-center space-x-2 mb-4">
+              <div className="text-center p-8 flex flex-col items-center bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm"> 
+                <div className="flex items-center space-x-2 mb-4"> 
                   <div className="w-4 h-4 rounded-full bg-blue-500 animate-bounce"></div>
                   <div className="w-4 h-4 rounded-full bg-blue-500 animate-bounce animation-delay-150"></div>
                   <div className="w-4 h-4 rounded-full bg-blue-500 animate-bounce animation-delay-300"></div>
@@ -602,43 +617,43 @@ const ConversationPage = ({ isDarkMode, transition }) => {
       {/* Audio player on the right - Fixed Position with two cards */}
       <div
         className={clsx(
-          "lg:w-1/3 lg:fixed lg:top-12 lg:right-0 lg:bottom-0 p-6 pt-8 flex flex-col overflow-y-auto",
+          "lg:w-1/3 lg:fixed lg:top-10 lg:right-0 lg:bottom-0 p-5 pt-7 flex flex-col overflow-y-auto", 
           isDarkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-800"
         )}
       >
-        <audio ref={audioRef} src="/placeholder.mp3" />
+        <audio ref={audioRef} src="/placeholder.mp3" /> 
 
         {/* Card for title and subtitles */}
         <Card
           className={clsx(
-            "flex-grow flex flex-col mb-6 overflow-hidden  transition-all duration-300",
+            "flex-grow flex flex-col mb-5 overflow-hidden  transition-all duration-300", 
             isDarkMode ? "bg-gray-900 border border-gray-700" : "bg-white border border-gray-200"
           )}
           style={{ height: "70%" }}
         >
-          <CardContent className="p-8 flex flex-col h-full relative">
+          <CardContent className="p-7 flex flex-col h-full relative"> 
             <h2
               className={clsx(
-                "text-3xl font-bold mb-6",
+                "text-2xl font-bold mb-5", 
                 isDarkMode ? "text-gray-100" : "text-gray-800"
               )}
             >
               Audio Summary
             </h2>
 
-            <p className="text-base text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3"> 
               Auto Generated by ElevenLabs
             </p>
             <div className="flex-grow flex items-center justify-center">
-              {isAudioLoading || dubbingInProgress ? ( // Check for both loading and dubbing
+              {isAudioLoading || dubbingInProgress ? (
                 <div className="flex flex-col items-center space-y-4">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
-                  {dubbingInProgress && ( // Show dubbing message
+                  {dubbingInProgress && ( 
                     <p className="text-center text-gray-500 dark:text-gray-400 text-sm">
                       Dubbing audio for the first time might take 1-2 minutes, you can refresh the page in between
                     </p>
                   )}
-                  {!dubbingInProgress && ( // Show regular loading message
+                  {!dubbingInProgress && (
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       Loading audio...
                     </p>
@@ -676,7 +691,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                 showSubtitles ? "Disable Subtitles" : "Enable Subtitles"
               }
               className={clsx(
-                "absolute bottom-2 right-2 transition-colors duration-200",
+                "absolute bottom-1.5 right-1.5 transition-colors duration-200", 
                 isDarkMode
                   ? "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
                   : "text-gray-600 hover:text-gray-800 hover:bg-gray-200"
@@ -694,19 +709,19 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         {/* Card for player controls */}
         <Card
           className={clsx(
-            "flex flex-col overflow-hidden transition-all duration-300",
+            "flex flex-col overflow-hidden transition-all duration-300", 
             isDarkMode ? "bg-gray-900 border border-gray-700" : "bg-white border border-gray-200"
           )}
           style={{ height: "30%" }}
         >
-          <CardContent className="p-8 flex flex-col h-full">
+          <CardContent className="p-7 flex flex-col h-full"> 
             {isAudioLoading ? (
               <div className="flex-grow flex items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div> 
                 <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Loading audio...</p>
               </div>
             ) : (
-              <div className="mt-auto space-y-6">
+              <div className="mt-auto space-y-6"> 
                 <div className="flex items-center justify-between text-base">
                   <span className="font-medium">{formatTime(currentTime)}</span>
                   <Slider
@@ -725,7 +740,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                     onClick={() => skipTime(-10)}
                     aria-label="Rewind 10 seconds"
                     className={clsx(
-                      "transition-colors duration-200",
+                      "transition-colors duration-200", 
                       isDarkMode
                         ? "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
                         : "text-gray-600 hover:text-gray-800 hover:bg-gray-200"
@@ -739,7 +754,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                     onClick={togglePlay}
                     aria-label={isPlaying ? "Pause" : "Play"}
                     className={clsx(
-                      "transition-colors duration-200 rounded-full",
+                      "transition-colors duration-200 rounded-full", 
                       isDarkMode
                         ? "text-gray-200 hover:text-white bg-gray-700 hover:bg-gray-600"
                         : "text-gray-800 hover:text-black bg-gray-200 hover:bg-gray-300"
@@ -759,7 +774,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                     onClick={() => skipTime(10)}
                     aria-label="Forward 10 seconds"
                     className={clsx(
-                      "transition-colors duration-200",
+                      "transition-colors duration-200", 
                       isDarkMode
                         ? "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
                         : "text-gray-600 hover:text-gray-800 hover:bg-gray-200"
@@ -770,7 +785,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3"> 
                     {volume === 0 ? (
                       <VolumeX className="h-6 w-6" />
                     ) : (
@@ -792,7 +807,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                     value={selectedLanguage}
                     disabled={isAudioLoading}
                   >
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-[120px]"> 
                       <SelectValue placeholder="Select Language" />
                     </SelectTrigger>
                     <SelectContent>

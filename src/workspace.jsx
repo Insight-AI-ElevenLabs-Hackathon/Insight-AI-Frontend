@@ -5,7 +5,6 @@ import {
   Routes,
   useNavigate,
   useLocation,
-  useParams,
   Link
 } from "react-router-dom";
 import FooterPopup from "./FooterPopup";
@@ -86,7 +85,7 @@ const WorkspaceContent = () => {
         }`}
       >
         <Header isDarkMode={isDarkMode} />
-        <main className="flex-grow flex overflow-hidden mt-12 pl-[60px]">
+        <main className="flex-grow flex overflow-hidden mt-10 pl-[56px]"> 
           <Sidebar
             isDarkMode={isDarkMode}
             toggleDarkMode={toggleDarkMode}
@@ -167,7 +166,7 @@ const Workspace = () => {
 // Header component with Link to homepage
 const Header = React.memo(({ isDarkMode }) => (
   <header
-    className={`flex justify-between items-center px-4 py-2 border-b fixed top-0 left-0 right-0 z-50 ${
+    className={`flex justify-between items-center px-3 py-1.5 border-b fixed top-0 left-0 right-0 z-50 ${
       isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"
     }`}
   >
@@ -175,7 +174,7 @@ const Header = React.memo(({ isDarkMode }) => (
       Insight AI
     </Link>
     <div
-      className={`text-sm px-2 py-1 rounded-full ${
+      className={`text-sm px-1.5 py-0.5 rounded-full ${
         isDarkMode ? "bg-blue-900 text-blue-200" : "bg-blue-100 text-blue-800"
       }`}
     >
@@ -293,39 +292,39 @@ const HomePage = React.memo(({ isDarkMode }) => {
     data,
   }) => (
     <motion.div
-      className={`w-80 h-56 ${
+      className={`w-64 h-48 ${
         isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
-      } rounded-lg p-6 shadow-lg border ${
+      } rounded-lg p-4 shadow-md border ${
         isDarkMode ? "border-gray-700" : "border-gray-200"
       } flex flex-col justify-between`}
       whileHover={{
-        scale: 1.03,
-        boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.1)",
+        scale: 1.02,
+        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", 
       }}
       transition={{ duration: 0.2 }}
-      onClick={() => handleInfoCardClick(data)} // Use the modified handler
+      onClick={() => handleInfoCardClick(data)}
       style={{ cursor: "pointer" }}
     >
       <div>
-        <div className="flex items-center mb-4">
-          <h3 className="font-semibold text-lg line-clamp-2">{title}</h3>
+        <div className="flex items-center mb-2">
+          <h3 className="font-semibold text-base line-clamp-2">{title}</h3> 
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1"> 
           {Object.entries(content).map(([key, value]) => (
             <p
               key={key}
-              className={`text-sm ${
+              className={`text-xs ${
                 isDarkMode ? "text-gray-300" : "text-gray-600"
               } flex items-center`}
             >
-              {key === "Congress" && <Building2 className="mr-2" size={16} />}
-              {key === "Bill Number" && <Hash className="mr-2" size={16} />}
-              {key === "Law Number" && <Hash className="mr-2" size={16} />}
-              {key === "Origin House" && <Scale className="mr-2" size={16} />}
+              {key === "Congress" && <Building2 className="mr-1" size={14} />} 
+              {key === "Bill Number" && <Hash className="mr-1" size={14} />} 
+              {key === "Law Number" && <Hash className="mr-1" size={14} />}
+              {key === "Origin House" && <Scale className="mr-1" size={14} />} 
               {key === "Last Updated" && (
-                <Calendar className="mr-2" size={16} />
+                <Calendar className="mr-1" size={14} /> 
               )}
-              <span className="font-medium mr-2">{key}:</span> {value}
+              <span className="font-medium mr-1">{key}:</span> {value}
             </p>
           ))}
         </div>
@@ -339,14 +338,14 @@ const HomePage = React.memo(({ isDarkMode }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="flex-grow p-8"
+      className="flex-grow p-6" 
     >
-      <div className="flex flex-col items-center mb-12">
+      <div className="flex flex-col items-center mb-8"> 
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-4xl font-bold mb-4 pt-8"
+          className="text-3xl font-bold mb-3 pt-6" 
         >
           Access to Governance for Everyone
         </motion.h1>
@@ -354,7 +353,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className={`${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-8`}
+          className={`${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-6`} 
         >
           Understand complex legislation effortlessly with audio summaries in
           multiple languages.
@@ -365,19 +364,19 @@ const HomePage = React.memo(({ isDarkMode }) => {
       </div>
 
       {/* Recent Bills Section */}
-      <div className="mb-16">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold grow text-center pt-8">
+      <div className="mb-12"> 
+        <div className="flex items-center justify-between mb-4"> 
+          <h2 className="text-xl font-semibold grow text-center pt-6">
             Recent Bills
           </h2>
           <div className="flex items-center">
             <button
-              className={`mr-4 ${
+              className={`mr-3 ${ 
                 isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
               }`}
               onClick={() => handleBillNavigation(-1)}
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} /> 
             </button>
             <button
               className={`${
@@ -385,12 +384,12 @@ const HomePage = React.memo(({ isDarkMode }) => {
               }`}
               onClick={() => handleBillNavigation(1)}
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} /> 
             </button>
           </div>
         </div>
-        <div className="relative px-4">
-          <div className="flex justify-center space-x-6">
+        <div className="relative px-3"> 
+          <div className="flex justify-center space-x-4"> 
             {billsData.map(
               (bill, index) =>
                 visibleBills.includes(index) && (
@@ -414,19 +413,19 @@ const HomePage = React.memo(({ isDarkMode }) => {
       </div>
 
       {/* Recent Laws Section */}
-      <div className="mb-16">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold grow text-center">
+      <div className="mb-12"> 
+        <div className="flex items-center justify-between mb-4"> 
+          <h2 className="text-xl font-semibold grow text-center">
             Recent Laws
           </h2>
           <div className="flex items-center">
             <button
-              className={`mr-4 ${
+              className={`mr-3 ${
                 isDarkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-600 hover:text-gray-800"
               }`}
               onClick={() => handleLawNavigation(-1)}
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} /> 
             </button>
             <button
               className={`${
@@ -434,12 +433,12 @@ const HomePage = React.memo(({ isDarkMode }) => {
               }`}
               onClick={() => handleLawNavigation(1)}
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} /> 
             </button>
           </div>
         </div>
-        <div className="relative px-4">
-          <div className="flex justify-center space-x-6">
+        <div className="relative px-3"> 
+          <div className="flex justify-center space-x-4"> 
             {lawsData.map(
               (law, index) =>
                 visibleLaws.includes(index) && (
@@ -454,7 +453,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
                     }}
                     icon={FileText}
                     isDarkMode={isDarkMode}
-                    data={law} // Pass the entire law object
+                    data={law} 
                   />
                 )
             )}
@@ -601,7 +600,7 @@ const InputArea = ({ isDarkMode }) => {
   }, []);
 
   return (
-    <div className="w-full max-w-3xl relative">
+    <div className="w-full max-w-2xl relative"> 
       <motion.form
         ref={formRef}
         initial={{ opacity: 0, y: 20 }}
@@ -615,18 +614,18 @@ const InputArea = ({ isDarkMode }) => {
         }`}
       >
         <div
-          className={`flex items-center p-4 rounded-t-lg ${
+          className={`flex items-center p-3 rounded-t-lg ${
             isDarkMode ? "bg-gray-800" : "bg-white"
           }`}
         >
           <input
             type="text"
             placeholder="Full Text Search..."
-            className={`flex-grow focus:outline-none px-3 py-2 ${
+            className={`flex-grow focus:outline-none px-2 py-1.5 ${
               isDarkMode
                 ? "text-gray-300 bg-gray-800"
                 : "text-gray-700 bg-white"
-            } text-base`}
+            } text-sm`} 
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onFocus={handleFocus}
@@ -635,7 +634,7 @@ const InputArea = ({ isDarkMode }) => {
             type="submit"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`ml-4 px-4 py-2 rounded-md text-sm font-medium flex items-center ${
+            className={`ml-3 px-3 py-1.5 rounded-md text-xs font-medium flex items-center ${
               isDarkMode
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-blue-100 text-blue-700 hover:bg-blue-200"
@@ -643,9 +642,9 @@ const InputArea = ({ isDarkMode }) => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-white mr-1"></div>
             ) : (
-              <Search className="w-4 h-4 mr-2" />
+              <Search className="w-3 h-3 mr-1" /> 
             )}
             {isLoading ? "Loading..." : "Search"}
           </motion.button>
@@ -659,27 +658,27 @@ const InputArea = ({ isDarkMode }) => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className={`p-4 overflow-hidden rounded-b-lg ${
+              className={`p-3 overflow-hidden rounded-b-lg ${
                 isDarkMode ? "bg-gray-800" : "bg-white" 
               }`}
             >
-              <div className="grid grid-cols-2 gap-4 py-2">
+              <div className="grid grid-cols-2 gap-3 py-1"> 
                 {/* Row 1 */}
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2"> 
                   <label
                     htmlFor="timeRange"
-                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                    className={`flex items-center text-xs font-medium whitespace-nowrap ${
                       isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
-                    <Calendar className="w-4 h-4 mr-1" />
+                    <Calendar className="w-3 h-3 mr-1" /> 
                     Time :
                   </label>
                   <select
                     id="timeRange"
                     value={timeRange}
                     onChange={(e) => setTimeRange(e.target.value)}
-                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    className={`flex-grow px-2 py-1 text-xs rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
                         ? "bg-gray-700 text-gray-200 border-gray-600" 
                         : "bg-gray-100 text-gray-700 border-gray-300"
@@ -693,14 +692,14 @@ const InputArea = ({ isDarkMode }) => {
                   </select>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2"> 
                   <label
                     htmlFor="billNumber"
-                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                    className={`flex items-center text-xs font-medium whitespace-nowrap ${
                       isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
-                    <FileText className="w-4 h-4 mr-1" />
+                    <FileText className="w-3 h-3 mr-1" /> 
                     Number:
                   </label>
                   <input
@@ -708,7 +707,7 @@ const InputArea = ({ isDarkMode }) => {
                     id="billNumber"
                     value={billNumber}
                     onChange={(e) => setBillNumber(e.target.value)}
-                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    className={`flex-grow px-2 py-1 text-xs rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
                         ? "bg-gray-700 text-gray-200 border-gray-600" 
                         : "bg-gray-100 text-gray-700 border-gray-300"
@@ -718,21 +717,21 @@ const InputArea = ({ isDarkMode }) => {
                 </div>
 
                 {/* Row 2 */}
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2"> 
                   <label
                     htmlFor="originHouse"
-                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                    className={`flex items-center text-xs font-medium whitespace-nowrap ${
                       isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
-                    <Building2 className="w-4 h-4 mr-1" />
+                    <Building2 className="w-3 h-3 mr-1" /> 
                     Origin:
                   </label>
                   <select
                     id="originHouse"
                     value={originHouse}
                     onChange={(e) => setOriginHouse(e.target.value)}
-                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    className={`flex-grow px-2 py-1 text-xs rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
                         ? "bg-gray-700 text-gray-200 border-gray-600" 
                         : "bg-gray-100 text-gray-700 border-gray-300"
@@ -744,21 +743,21 @@ const InputArea = ({ isDarkMode }) => {
                   </select>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2"> 
                   <label
                     htmlFor="docType"
-                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                    className={`flex items-center text-xs font-medium whitespace-nowrap ${
                       isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
-                    <Scale className="w-4 h-4 mr-1" />
+                    <Scale className="w-3 h-3 mr-1" /> 
                     Type:
                   </label>
                   <select
                     id="docType"
                     value={docType}
                     onChange={(e) => setDocType(e.target.value)}
-                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    className={`flex-grow px-2 py-1 text-xs rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
                         ? "bg-gray-700 text-gray-200 border-gray-600" 
                         : "bg-gray-100 text-gray-700 border-gray-300"
@@ -791,15 +790,15 @@ const InputArea = ({ isDarkMode }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className={`w-full max-w-3xl p-8 rounded-lg shadow-lg overflow-y-auto max-h-[80vh] ${
+              className={`w-full max-w-2xl p-6 rounded-lg shadow-lg overflow-y-auto max-h-[80vh] ${
                 isDarkMode
                   ? "bg-gray-800 border-gray-700 text-gray-300" 
                   : "bg-white border-gray-300"
               }`}
             >
-              <div className="flex justify-between items-center mb-6"> 
+              <div className="flex justify-between items-center mb-4"> 
                 <h2
-                  className={`text-2xl font-semibold ${
+                  className={`text-xl font-semibold ${
                     isDarkMode ? "text-gray-300" : "text-gray-800"
                   }`}
                 >
@@ -807,7 +806,7 @@ const InputArea = ({ isDarkMode }) => {
                 </h2>
                 <button 
                   onClick={() => setShowPopup(false)}
-                  className={`p-2 rounded-full hover:bg-gray-200 ${isDarkMode ? "hover:bg-gray-700" : ""}`} 
+                  className={`p-1.5 rounded-full hover:bg-gray-200 ${isDarkMode ? "hover:bg-gray-700" : ""}`} 
                 >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
@@ -815,7 +814,7 @@ const InputArea = ({ isDarkMode }) => {
                     viewBox="0 0 24 24" 
                     strokeWidth={1.5} 
                     stroke="currentColor" 
-                    className="w-6 h-6"
+                    className="w-5 h-5" 
                   >
                     <path 
                       strokeLinecap="round" 
@@ -828,7 +827,7 @@ const InputArea = ({ isDarkMode }) => {
 
               {isLoading && (
                 <div className="flex justify-center items-center h-full">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-blue-500"></div>
                 </div>
               )}
 
@@ -837,7 +836,7 @@ const InputArea = ({ isDarkMode }) => {
               )}
 
               {!isLoading && searchResults.length > 0 && (
-                <ul className="space-y-4"> 
+                <ul className="space-y-3"> 
                   {searchResults.map((result) => (
                     <motion.li
                       key={result.packageId}
@@ -845,7 +844,7 @@ const InputArea = ({ isDarkMode }) => {
                         scale: 1.02, 
                         backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" 
                       }}
-                      className={`px-6 py-4 cursor-pointer border-b group rounded-md ${
+                      className={`px-4 py-3 cursor-pointer border-b group rounded-md ${
                         isDarkMode ? "border-gray-700" : "border-gray-200"
                       }`}
                       onClick={async () => {
@@ -855,14 +854,13 @@ const InputArea = ({ isDarkMode }) => {
                       }}
                     >
                       <h3
-                        className={`text-xl font-medium mb-2 transition-colors group-hover:text-blue-500 ${
+                        className={`text-base font-medium mb-1 transition-colors group-hover:text-blue-500 ${
                           isDarkMode ? "text-gray-300" : "text-gray-800"
                         }`}
                       >
-                        {result.title}
-                      </h3>
+                        {result.title}</h3>
                       <p
-                        className={`text-base ${
+                        className={`text-sm ${
                           isDarkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
@@ -873,12 +871,12 @@ const InputArea = ({ isDarkMode }) => {
                         )}
                       </p>
                       {result.origin && (
-                        <span className={`block text-sm mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}> 
+                        <span className={`block text-xs mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}> 
                           <strong>Origin:</strong> {result.origin}
                         </span>
                       )}
                       {result.docType && (
-                        <span className={`block text-sm mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+                        <span className={`block text-xs mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
                           <strong>Type:</strong> {result.docType}
                         </span>
                       )}
@@ -913,24 +911,24 @@ const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
 
   return (
     <aside
-      className={`w-16 border-r flex flex-col ${
+      className={`w-14 border-r flex flex-col ${
         isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-50"
-      } h-full fixed top-12 left-0 z-40`}
+      } h-full fixed top-10 left-0 z-40`} 
     >
-      <div className="space-y-6 flex flex-col items-center py-6">
+      <div className="space-y-4 flex flex-col items-center py-4"> 
         {icons.map(({ Icon, tooltip, onClick }, index) => (
           <motion.button
             key={index}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className={`p-3 rounded-lg transition-colors duration-200 relative group ${
+            className={`p-2 rounded-lg transition-colors duration-200 relative group ${
               isDarkMode
                 ? "hover:bg-gray-800 text-gray-400 hover:text-gray-200"
                 : "hover:bg-gray-200 text-gray-600 hover:text-gray-800"
             }`}
-            onClick={onClick} // Add onClick handler 
+            onClick={onClick} 
           >
-            <Icon size={24} />
+            <Icon size={20} /> 
             <span className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap top-1/2 -translate-y-1/2 pointer-events-none">
               {tooltip}
             </span>
@@ -939,18 +937,18 @@ const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
       </div>
 
       {/* Light/Dark Mode Switch */}
-      <div className="absolute bottom-12 flex flex-col items-center left-0 w-full p-3">
+      <div className="absolute bottom-10 flex flex-col items-center left-0 w-full p-2"> 
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className={`p-3 rounded-lg transition-colors duration-200 relative group ${
+          className={`p-2 rounded-lg transition-colors duration-200 relative group ${
             isDarkMode
               ? "hover:bg-gray-800 text-gray-400 hover:text-gray-200"
               : "hover:bg-gray-200 text-gray-600 hover:text-gray-800"
           }`}
           onClick={toggleDarkMode}
         >
-          {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />} 
           <span className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap top-1/2 -translate-y-1/2 pointer-events-none">
             {isDarkMode ? "Light Mode" : "Dark Mode"}
           </span>
@@ -971,27 +969,54 @@ const HistoryPage = ({ isDarkMode }) => {
     }
   }, []);
 
+  const clearHistory = () => {
+    localStorage.removeItem('conversations');
+    setConversations([]);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="flex-grow p-8"
+      className="flex-grow p-6" 
     >
-      <h1 className="text-3xl font-bold mb-6">Conversation History</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">History</h1>
+        <button
+          onClick={clearHistory}
+          className={`p-1.5 rounded-full hover:bg-gray-200 ${isDarkMode ? "hover:bg-gray-700" : ""}`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+            />
+          </svg>
+        </button>
+      </div>
+
       {conversations.length === 0 ? (
         <p className="text-gray-500">No conversations yet.</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-3"> 
           {conversations.map((conversation) => (
             // Use conversation.id as the key:
-            <li key={conversation.id} className={`p-4 rounded-lg shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}> 
+            <li key={conversation.id} className={`p-3 rounded-lg shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}> 
               <p>
                 <strong>{conversation.title}</strong> 
                 {' '} - {new Date(conversation.date).toLocaleDateString()}
               </p>
-              <p className="text-gray-500 text-sm">{conversation.id}</p>
+              <p className="text-gray-500 text-xs">{conversation.id}</p> 
             </li>
           ))}
         </ul>
@@ -1000,19 +1025,19 @@ const HistoryPage = ({ isDarkMode }) => {
   );
 };
 
-// Improved FeedbackPage component
+// Improved FeedbackPage component with slider for rating and centered layout
 const FeedbackPage = ({ isDarkMode }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [rating, setRating] = useState(0); // Add rating state
-  const [submitted, setSubmitted] = useState(false); // Add submitted state
+  const [rating, setRating] = useState(3); // Initial rating value
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Here you would typically send the feedback to your server or API
     console.log("Feedback submitted:", { name, email, feedback, rating });
-    setSubmitted(true); 
+    setSubmitted(true);
   };
 
   if (submitted) {
@@ -1022,10 +1047,12 @@ const FeedbackPage = ({ isDarkMode }) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.5 }}
-        className="flex-grow p-8"
+        className="flex-grow p-6 flex items-center justify-center" 
       >
-        <h1 className="text-3xl font-bold mb-6">Thank You!</h1>
-        <p>Your feedback has been submitted. We appreciate you taking the time to share your thoughts.</p>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Thank You!</h1> 
+          <p>Your feedback has been submitted. We appreciate you taking the time to share your thoughts.</p>
+        </div>
       </motion.div>
     );
   }
@@ -1036,73 +1063,68 @@ const FeedbackPage = ({ isDarkMode }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
-      className="flex-grow p-8"
+      className="flex-grow p-6 flex items-center justify-center" 
     >
-      <h1 className="text-3xl font-bold mb-6">Feedback</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Name</label>
-          <input 
-            type="text" 
-            id="name" 
-            value={name} 
-            onChange={(e) => setName(e.target.value)}
-            className={`mt-1 px-4 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`} 
-            required 
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Email</label>
-          <input 
-            type="email" 
-            id="email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)}
-            className={`mt-1 px-4 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`} 
-            required 
-          />
-        </div>
-
-        {/* Rating (using radio buttons) */}
-        <div>
-          <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Rating</label>
-          <div className="mt-2 flex items-center">
-            {[1, 2, 3, 4, 5].map((value) => (
-              <label key={value} className="mr-4">
-                <input
-                  type="radio"
-                  name="rating"
-                  value={value}
-                  checked={rating === value}
-                  onChange={() => setRating(value)}
-                  className="form-radio text-blue-600"
-                />
-                {value}
-              </label>
-            ))}
+      <div className="w-full max-w-md space-y-6"> 
+        <h1 className="text-2xl font-bold text-center">Feedback</h1> 
+        <form onSubmit={handleSubmit} className="space-y-4"> 
+          <div>
+            <label htmlFor="name" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Name</label>
+            <input 
+              type="text" 
+              id="name" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)}
+              className={`mt-1 px-3 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`} 
+              required 
+            />
           </div>
-        </div>
+          <div>
+            <label htmlFor="email" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              className={`mt-1 px-3 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`} 
+              required 
+            />
+          </div>
 
-        <div>
-          <label htmlFor="feedback" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Feedback</label>
-          <textarea
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            placeholder="Enter your feedback here..."
-            className={`mt-1 px-4 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`}
-            rows="5" 
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className={`px-6 py-3 rounded-lg text-white font-medium ${
-            isDarkMode ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-500 hover:bg-blue-600"
-          }`}
-        >
-          Submit Feedback
-        </button>
-      </form>
+          {/* Rating Slider */}
+          <div>
+            <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Rating: {rating}</label> 
+            <input 
+              type="range" 
+              min="1" 
+              max="5" 
+              value={rating} 
+              onChange={(e) => setRating(parseInt(e.target.value, 10))} 
+              className={`w-full ${isDarkMode ? "accent-blue-500" : "accent-blue-600"}`} 
+            />
+          </div>
+
+          <div>
+            <label htmlFor="feedback" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Feedback</label>
+            <textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder="Enter your feedback here..."
+              className={`mt-1 px-3 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`}
+              rows="4" 
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className={`w-full px-5 py-2.5 rounded-lg text-white font-medium ${
+              isDarkMode ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-500 hover:bg-blue-600"
+            }`}
+          >
+            Submit Feedback
+          </button>
+        </form>
+      </div>
     </motion.div>
   );
 };
