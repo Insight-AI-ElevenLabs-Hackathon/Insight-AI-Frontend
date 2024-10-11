@@ -182,7 +182,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
     const fetchData = async () => {
       if (selectedItemData && selectedItemData.url) {
         setIsDataFetching(true);
-        const apiUrl = `https://1599-204-236-206-9.ngrok-free.app/info/${encodeURIComponent(
+        const apiUrl = `https://randy-instantly-boundaries-performance.trycloudflare.com/info/${encodeURIComponent(
           selectedItemData.url
         )}`;
 
@@ -423,19 +423,19 @@ const ConversationPage = ({ isDarkMode, transition }) => {
 
   const handleLanguageChange = async (newLanguage) => {
     setSelectedLanguage(newLanguage);
-    setIsAudioLoading(true); // Show loading immediately
+    setIsAudioLoading(true);
 
-    let newAudioSrc = null; // Store the new audio source URL
+    let newAudioSrc = null;
 
     if (newLanguage !== "English" && jsonData && jsonData.audio_path) {
-      setDubbingInProgress(true); // Set dubbing in progress to true
+      setDubbingInProgress(true);
 
       const audioName = jsonData.audio_path.split("_")[0];
       const audioUrl = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${jsonData.audio_path}`;
 
       try {
         const response = await fetch(
-          "https://wh10lx31-5000.inc1.devtunnels.ms/dub",
+          "https://randy-instantly-boundaries-performance.trycloudflare.com/dub",
           {
             method: "POST",
             headers: {
