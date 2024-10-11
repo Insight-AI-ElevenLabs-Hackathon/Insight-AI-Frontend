@@ -6,8 +6,8 @@ import {
   useNavigate,
   useLocation,
   useParams,
+  Link
 } from "react-router-dom";
-import Sidebar from "./Sidebar";
 import FooterPopup from "./FooterPopup";
 import {
   ChevronLeft,
@@ -18,6 +18,10 @@ import {
   Calendar,
   Building2,
   Search,
+  History,
+  Flag,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConversationPage from "./ConversationPage";
@@ -90,13 +94,18 @@ const WorkspaceContent = () => {
           <div className="flex-grow overflow-y-auto">
             <AnimatePresence mode="wait">
               <Routes>
-                <Route
-                  path="/"
-                  element={<HomePage isDarkMode={isDarkMode} />}
-                />
+                <Route path="/" element={<HomePage isDarkMode={isDarkMode} />} />
                 <Route
                   path="/conversation/:id"
                   element={<ConversationPage isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="/history"
+                  element={<HistoryPage isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="/feedback"
+                  element={<FeedbackPage isDarkMode={isDarkMode} />}
                 />
               </Routes>
             </AnimatePresence>
@@ -155,13 +164,16 @@ const Workspace = () => {
   );
 };
 
+// Header component with Link to homepage
 const Header = React.memo(({ isDarkMode }) => (
   <header
     className={`flex justify-between items-center px-4 py-2 border-b fixed top-0 left-0 right-0 z-50 ${
       isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"
     }`}
   >
-    <div className="text-2xl font-semibold">Insight AI</div>
+    <Link to="/" className="text-2xl font-semibold"> 
+      Insight AI
+    </Link>
     <div
       className={`text-sm px-2 py-1 rounded-full ${
         isDarkMode ? "bg-blue-900 text-blue-200" : "bg-blue-100 text-blue-800"
@@ -171,6 +183,7 @@ const Header = React.memo(({ isDarkMode }) => (
     </div>
   </header>
 ));
+
 
 const HomePage = React.memo(({ isDarkMode }) => {
   const navigate = useNavigate();
@@ -229,7 +242,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
     fetchData();
   }, []);
 
-  // Modified InfoCard onClick handler
+  // Modified InfoCard onClick handler to add conversation to history
   const handleInfoCardClick = async (data) => {
     try {
       const response = await fetch('https://uid-generator.insight-ai.workers.dev/', { 
@@ -242,15 +255,35 @@ const HomePage = React.memo(({ isDarkMode }) => {
         const { uid } = await response.json();
         localStorage.setItem("selectedItemData", JSON.stringify(data));
         setSelectedItemData(data);
-        navigate(`/conversation/${uid}`);
+
+        // Add the new conversation to the history:
+        const newConversation = {
+          id: uid,
+          title: data.title,
+          date: new Date(), 
+        };
+        updateConversationHistory(newConversation);
+
+        navigate(`/conversation/${uid}`); 
       } else {
         console.error('Error generating UID:', response.status);
       }
     } catch (error) {
       console.error('Error generating UID:', error);
-      // Handle error appropriately
     }
   };
+
+  // Function to update the conversation history in localStorage
+  const updateConversationHistory = (newConversation) => {
+    const storedConversations = localStorage.getItem('conversations');
+    let conversations = [];
+    if (storedConversations) {
+      conversations = JSON.parse(storedConversations);
+    }
+    conversations.push(newConversation);
+    localStorage.setItem('conversations', JSON.stringify(conversations));
+  };
+
 
   const InfoCard = ({
     title,
@@ -513,6 +546,14 @@ const InputArea = ({ isDarkMode }) => {
         // 3. Set selected item data using the parsed result
         setSelectedItemData(parsedResult);
 
+        // Add the new conversation to the history:
+        const newConversation = {
+          id: uid,
+          title: result.title,
+          date: new Date(),
+        };
+        updateConversationHistory(newConversation); 
+
         // 4. Navigate to the conversation page
         navigate(`/conversation/${uid}`);
 
@@ -528,6 +569,17 @@ const InputArea = ({ isDarkMode }) => {
       setIsLoading(false); // Stop loading
       setShowPopup(false);
     }
+  };
+
+  // Function to update the conversation history in localStorage (same as in HomePage)
+  const updateConversationHistory = (newConversation) => {
+    const storedConversations = localStorage.getItem('conversations');
+    let conversations = [];
+    if (storedConversations) {
+      conversations = JSON.parse(storedConversations);
+    }
+    conversations.push(newConversation);
+    localStorage.setItem('conversations', JSON.stringify(conversations));
   };
 
   const handleFocus = () => {
@@ -608,7 +660,7 @@ const InputArea = ({ isDarkMode }) => {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className={`p-4 overflow-hidden rounded-b-lg ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-100"
+                isDarkMode ? "bg-gray-800" : "bg-white" 
               }`}
             >
               <div className="grid grid-cols-2 gap-4 py-2">
@@ -617,7 +669,7 @@ const InputArea = ({ isDarkMode }) => {
                   <label
                     htmlFor="timeRange"
                     className={`flex items-center text-sm font-medium whitespace-nowrap ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
                     <Calendar className="w-4 h-4 mr-1" />
@@ -629,8 +681,8 @@ const InputArea = ({ isDarkMode }) => {
                     onChange={(e) => setTimeRange(e.target.value)}
                     className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
-                        ? "bg-gray-600 text-gray-300 border-gray-500"
-                        : "bg-white text-gray-700 border-gray-300"
+                        ? "bg-gray-700 text-gray-200 border-gray-600" 
+                        : "bg-gray-100 text-gray-700 border-gray-300"
                     }`}
                   >
                     <option value="">Select Time Range</option>
@@ -645,7 +697,7 @@ const InputArea = ({ isDarkMode }) => {
                   <label
                     htmlFor="billNumber"
                     className={`flex items-center text-sm font-medium whitespace-nowrap ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
                     <FileText className="w-4 h-4 mr-1" />
@@ -658,8 +710,8 @@ const InputArea = ({ isDarkMode }) => {
                     onChange={(e) => setBillNumber(e.target.value)}
                     className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
-                        ? "bg-gray-600 text-gray-300 border-gray-500"
-                        : "bg-white text-gray-700 border-gray-300"
+                        ? "bg-gray-700 text-gray-200 border-gray-600" 
+                        : "bg-gray-100 text-gray-700 border-gray-300"
                     }`}
                     placeholder="Bill/Law number"
                   />
@@ -670,7 +722,7 @@ const InputArea = ({ isDarkMode }) => {
                   <label
                     htmlFor="originHouse"
                     className={`flex items-center text-sm font-medium whitespace-nowrap ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
                     <Building2 className="w-4 h-4 mr-1" />
@@ -682,8 +734,8 @@ const InputArea = ({ isDarkMode }) => {
                     onChange={(e) => setOriginHouse(e.target.value)}
                     className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
-                        ? "bg-gray-600 text-gray-300 border-gray-500"
-                        : "bg-white text-gray-700 border-gray-300"
+                        ? "bg-gray-700 text-gray-200 border-gray-600" 
+                        : "bg-gray-100 text-gray-700 border-gray-300"
                     }`}
                   >
                     <option value="">Select Origin</option>
@@ -696,7 +748,7 @@ const InputArea = ({ isDarkMode }) => {
                   <label
                     htmlFor="docType"
                     className={`flex items-center text-sm font-medium whitespace-nowrap ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-gray-200" : "text-gray-700" 
                     }`}
                   >
                     <Scale className="w-4 h-4 mr-1" />
@@ -708,8 +760,8 @@ const InputArea = ({ isDarkMode }) => {
                     onChange={(e) => setDocType(e.target.value)}
                     className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                       isDarkMode
-                        ? "bg-gray-600 text-gray-300 border-gray-500"
-                        : "bg-white text-gray-700 border-gray-300"
+                        ? "bg-gray-700 text-gray-200 border-gray-600" 
+                        : "bg-gray-100 text-gray-700 border-gray-300"
                     }`}
                   >
                     <option value="">Select Type</option>
@@ -739,84 +791,321 @@ const InputArea = ({ isDarkMode }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className={`w-full max-w-3xl p-8 rounded-lg shadow-lg bg-white overflow-y-auto max-h-[80vh] ${
+              className={`w-full max-w-3xl p-8 rounded-lg shadow-lg overflow-y-auto max-h-[80vh] ${
                 isDarkMode
-                  ? "bg-gray-800 border-gray-700"
+                  ? "bg-gray-800 border-gray-700 text-gray-300" 
                   : "bg-white border-gray-300"
               }`}
             >
-              <h2
-                className={`text-2xl font-semibold mb-6 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-800"
-                }`}
-              >
-                Search Results
-              </h2>
+              <div className="flex justify-between items-center mb-6"> 
+                <h2
+                  className={`text-2xl font-semibold ${
+                    isDarkMode ? "text-gray-300" : "text-gray-800"
+                  }`}
+                >
+                  Search Results
+                </h2>
+                <button 
+                  onClick={() => setShowPopup(false)}
+                  className={`p-2 rounded-full hover:bg-gray-200 ${isDarkMode ? "hover:bg-gray-700" : ""}`} 
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    strokeWidth={1.5} 
+                    stroke="currentColor" 
+                    className="w-6 h-6"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      d="M6 18L18 6M6 6l12 12" 
+                    />
+                  </svg>
+                </button>
+              </div>
+
               {isLoading && (
                 <div className="flex justify-center items-center h-full">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
                 </div>
               )}
-              {!isLoading && searchResults.map((result) => (
-                <motion.div
-                  key={result.packageId}
-                  whileHover={{ scale: 1.02 }}
-                  className={`px-6 py-4 cursor-pointer border-b group ${
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
-                  }`}
-                  onClick={async () => { // Use async function here
-                    console.log("Result passed to onClick:", result);
-                    await handleResultClick(result); // Await handleResultClick
-                    setShowPopup(false);
-                  }}
-                >
-                  <h3
-                    className={`text-xl font-medium mb-2 transition-colors group-hover:text-blue-500 ${
-                      isDarkMode ? "text-gray-300" : "text-gray-800"
-                    }`}
-                  >
-                    {result.title}
-                  </h3>
-                  <p
-                    className={`text-base ${
-                      isDarkMode ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {result.dateIssued && (
-                      <span>
-                        <strong>Date Issued:</strong> {result.dateIssued}
-                      </span>
-                    )}
-                  </p>
-                  {result.origin && (
-                    <span className="block text-sm text-gray-500 mt-1">
-                      <strong>Origin:</strong> {result.origin}
-                    </span>
-                  )}
-                  {result.docType && (
-                    <span className="block text-sm text-gray-500 mt-1">
-                      <strong>Type:</strong> {result.docType}
-                    </span>
-                  )}
-                </motion.div>
-              ))}
-              <button
-                className={`mt-6 px-6 py-3 rounded-md text-base font-medium ${
-                  isDarkMode
-                    ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-                onClick={() => setShowPopup(false)}
-                ></button>
-                <button>
-                  Close
-                </button>
-              </motion.div>
+
+              {!isLoading && searchResults.length === 0 && (
+                <p className="text-center text-gray-500">No results found.</p> 
+              )}
+
+              {!isLoading && searchResults.length > 0 && (
+                <ul className="space-y-4"> 
+                  {searchResults.map((result) => (
+                    <motion.li
+                      key={result.packageId}
+                      whileHover={{ 
+                        scale: 1.02, 
+                        backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" 
+                      }}
+                      className={`px-6 py-4 cursor-pointer border-b group rounded-md ${
+                        isDarkMode ? "border-gray-700" : "border-gray-200"
+                      }`}
+                      onClick={async () => {
+                        console.log("Result passed to onClick:", result);
+                        await handleResultClick(result);
+                        setShowPopup(false);
+                      }}
+                    >
+                      <h3
+                        className={`text-xl font-medium mb-2 transition-colors group-hover:text-blue-500 ${
+                          isDarkMode ? "text-gray-300" : "text-gray-800"
+                        }`}
+                      >
+                        {result.title}
+                      </h3>
+                      <p
+                        className={`text-base ${
+                          isDarkMode ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        {result.dateIssued && (
+                          <span>
+                            <strong>Date Issued:</strong> {result.dateIssued}
+                          </span>
+                        )}
+                      </p>
+                      {result.origin && (
+                        <span className={`block text-sm mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}> 
+                          <strong>Origin:</strong> {result.origin}
+                        </span>
+                      )}
+                      {result.docType && (
+                        <span className={`block text-sm mt-1 ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+                          <strong>Type:</strong> {result.docType}
+                        </span>
+                      )}
+                    </motion.li>
+                  ))}
+                </ul>
+              )}
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// Sidebar component with History navigation
+const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
+  const navigate = useNavigate();
+
+  const icons = [
+    { 
+      Icon: History, 
+      tooltip: "History", 
+      onClick: () => navigate('/history') 
+    },
+    { 
+      Icon: Flag, 
+      tooltip: "Feedback", 
+      onClick: () => navigate('/feedback') // Navigate to /feedback 
+    },
+  ];
+
+  return (
+    <aside
+      className={`w-16 border-r flex flex-col ${
+        isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-50"
+      } h-full fixed top-12 left-0 z-40`}
+    >
+      <div className="space-y-6 flex flex-col items-center py-6">
+        {icons.map(({ Icon, tooltip, onClick }, index) => (
+          <motion.button
+            key={index}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className={`p-3 rounded-lg transition-colors duration-200 relative group ${
+              isDarkMode
+                ? "hover:bg-gray-800 text-gray-400 hover:text-gray-200"
+                : "hover:bg-gray-200 text-gray-600 hover:text-gray-800"
+            }`}
+            onClick={onClick} // Add onClick handler 
+          >
+            <Icon size={24} />
+            <span className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap top-1/2 -translate-y-1/2 pointer-events-none">
+              {tooltip}
+            </span>
+          </motion.button>
+        ))}
       </div>
-    );
+
+      {/* Light/Dark Mode Switch */}
+      <div className="absolute bottom-12 flex flex-col items-center left-0 w-full p-3">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className={`p-3 rounded-lg transition-colors duration-200 relative group ${
+            isDarkMode
+              ? "hover:bg-gray-800 text-gray-400 hover:text-gray-200"
+              : "hover:bg-gray-200 text-gray-600 hover:text-gray-800"
+          }`}
+          onClick={toggleDarkMode}
+        >
+          {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+          <span className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap top-1/2 -translate-y-1/2 pointer-events-none">
+            {isDarkMode ? "Light Mode" : "Dark Mode"}
+          </span>
+        </motion.button>
+      </div>
+    </aside>
+  );
+};
+
+// HistoryPage component
+const HistoryPage = ({ isDarkMode }) => {
+  const [conversations, setConversations] = useState([]);
+
+  useEffect(() => {
+    const storedConversations = localStorage.getItem('conversations');
+    if (storedConversations) {
+      setConversations(JSON.parse(storedConversations));
+    }
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+      className="flex-grow p-8"
+    >
+      <h1 className="text-3xl font-bold mb-6">Conversation History</h1>
+      {conversations.length === 0 ? (
+        <p className="text-gray-500">No conversations yet.</p>
+      ) : (
+        <ul className="space-y-4">
+          {conversations.map((conversation) => (
+            // Use conversation.id as the key:
+            <li key={conversation.id} className={`p-4 rounded-lg shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}> 
+              <p>
+                <strong>{conversation.title}</strong> 
+                {' '} - {new Date(conversation.date).toLocaleDateString()}
+              </p>
+              <p className="text-gray-500 text-sm">{conversation.id}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </motion.div>
+  );
+};
+
+// Improved FeedbackPage component
+const FeedbackPage = ({ isDarkMode }) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [rating, setRating] = useState(0); // Add rating state
+  const [submitted, setSubmitted] = useState(false); // Add submitted state
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Here you would typically send the feedback to your server or API
+    console.log("Feedback submitted:", { name, email, feedback, rating });
+    setSubmitted(true); 
   };
-  
-  export default Workspace; 
+
+  if (submitted) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+        className="flex-grow p-8"
+      >
+        <h1 className="text-3xl font-bold mb-6">Thank You!</h1>
+        <p>Your feedback has been submitted. We appreciate you taking the time to share your thoughts.</p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+      className="flex-grow p-8"
+    >
+      <h1 className="text-3xl font-bold mb-6">Feedback</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="name" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Name</label>
+          <input 
+            type="text" 
+            id="name" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)}
+            className={`mt-1 px-4 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`} 
+            required 
+          />
+        </div>
+        <div>
+          <label htmlFor="email" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)}
+            className={`mt-1 px-4 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`} 
+            required 
+          />
+        </div>
+
+        {/* Rating (using radio buttons) */}
+        <div>
+          <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Rating</label>
+          <div className="mt-2 flex items-center">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <label key={value} className="mr-4">
+                <input
+                  type="radio"
+                  name="rating"
+                  value={value}
+                  checked={rating === value}
+                  onChange={() => setRating(value)}
+                  className="form-radio text-blue-600"
+                />
+                {value}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="feedback" className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>Feedback</label>
+          <textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="Enter your feedback here..."
+            className={`mt-1 px-4 py-2 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white border-gray-300"}`}
+            rows="5" 
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className={`px-6 py-3 rounded-lg text-white font-medium ${
+            isDarkMode ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-500 hover:bg-blue-600"
+          }`}
+        >
+          Submit Feedback
+        </button>
+      </form>
+    </motion.div>
+  );
+};
+
+
+export default Workspace;

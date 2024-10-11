@@ -6,7 +6,7 @@ import { Moon, Sun } from "lucide-react";
 const Sidebar = ({ isDarkMode, toggleDarkMode }) => {
   const icons = [
     { Icon: History, tooltip: "History" },
-    { Icon: Flag, tooltip: "Review" },
+    { Icon: Flag, tooltip: "Feedback" },
   ];
 
   return (
