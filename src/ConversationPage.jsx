@@ -14,7 +14,7 @@ import {
   Users,
   FileText,
   Globe,
-  AlertTriangle,
+  Shield,
   Captions,
   CaptionsOff,
 } from "lucide-react";
@@ -22,7 +22,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import clsx from "clsx";
 import { SelectedItemDataContext } from "./workspace";
 import ReactMarkdown from "react-markdown";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Helper functions outside the component scope
 function convertTimeToSeconds(time) {
@@ -46,10 +46,14 @@ function parseSRT(srtString) {
       const [startTime, endTime] = parts[1].split(" --> ");
       if (startTime && endTime) {
         const text = parts.slice(2).join("\n");
+
+        // Decode the text using UTF-8 encoding
+        const decodedText = decodeURIComponent(escape(text));
+
         subtitles.push({
           start: convertTimeToSeconds(startTime),
           end: convertTimeToSeconds(endTime),
-          text: text,
+          text: decodedText, // Use the decoded text
         });
       }
     }
@@ -128,11 +132,46 @@ const ConversationPage = ({ isDarkMode, transition }) => {
   const audioRef = useRef(null);
   const [subtitles, setSubtitles] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [dubbingInProgress, setDubbingInProgress] = useState(false);
+  const [dubbedAudioUrl, setDubbedAudioUrl] = useState(null);
 
   const { selectedItemData } = useContext(SelectedItemDataContext);
   const [jsonData, setJsonData] = useState(null);
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(true);
+
+  // Language code mapping
+  const languageCodes = {
+    English: "en",
+    Chinese: "zh",
+    Spanish: "es",
+    Hindi: "hi",
+    Portuguese: "pt",
+    French: "fr",
+    German: "de",
+    Japanese: "ja",
+    Arabic: "ar",
+    Russian: "ru",
+    Korean: "ko",
+    Indonesian: "id",
+    Italian: "it",
+    Dutch: "nl",
+    Turkish: "tr",
+    Polish: "pl",
+    Swedish: "sv",
+    Filipino: "fil",
+    Malay: "ms",
+    Romanian: "ro",
+    Ukrainian: "uk",
+    Greek: "el",
+    Czech: "cs",
+    Danish: "da",
+    Finnish: "fi",
+    Bulgarian: "bg",
+    Croatian: "hr",
+    Slovak: "sk",
+    Tamil: "ta",
+  };
 
   useEffect(() => {
     document.body.classList.toggle("dark", isDarkMode);
@@ -176,6 +215,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
           const response = await fetch(apiUrl, { signal: controller.signal });
           const data = await response.json();
           setJsonData(data);
+          console.log(data);
 
           if (data.audio_path) {
             audioRef.current.src = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${data.audio_path}`;
@@ -250,7 +290,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
   };
 
   const renderBillContent = (data) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <InfoCard
         icon={<Calendar className="text-blue-500" />}
         title="Introduced Date"
@@ -262,13 +302,27 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         content={data.origin_chamber}
       />
       <InfoCard
+        icon={<Shield className="text-red-500" />}
+        title="Official Texts"
+        pdf_link={data.pdf_link}
+        htm_link={data.htm_link}
+        colSpan={2} // Span two columns on medium and larger screens
+      />
+      <InfoCard
+        icon={<FileText className="text-orange-500" />}
+        title="Policy Area"
+        content={data.policy_area}
+      />
+      <InfoCard
         icon={<Users className="text-purple-500" />}
-        title="Sponsor"
+        title="Sponsor  "
         content={`${data.sponsor} (${data.sponsor_party}-${data.sponsor_state})`}
       >
         {/* Sponsor ID Tag with Link */}
         <a
-          href={`https://www.google.com/search?q=${encodeURIComponent(data.sponsor)}`}
+          href={`https://www.google.com/search?q=${encodeURIComponent(
+            data.sponsor
+          )}`}
           target="_blank"
           rel="noopener noreferrer"
           className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 hover:bg-green-200 transition-colors duration-200"
@@ -276,12 +330,8 @@ const ConversationPage = ({ isDarkMode, transition }) => {
           {data.sponsor_id}
         </a>
       </InfoCard>
-      <InfoCard
-        icon={<FileText className="text-orange-500" />}
-        title="Policy Area"
-        content={data.policy_area}
-      />
-      <div className="md:col-span-2">
+
+      <div className="md:col-span-3 md:row-span-2">
         <InfoCard
           icon={<Globe className="text-teal-500" />}
           title="Summary"
@@ -292,9 +342,8 @@ const ConversationPage = ({ isDarkMode, transition }) => {
     </div>
   );
 
-
   const renderLawContent = (data) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <InfoCard
         icon={<Calendar className="text-blue-500" />}
         title="Date Issued"
@@ -310,7 +359,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
         title="Policy Area"
         content={data.policy_area}
       />
-      <div className="md:col-span-2">
+      <div className="md:col-span-3 md:row-span-2">
         <InfoCard
           icon={<Globe className="text-teal-500" />}
           title="Summary"
@@ -321,50 +370,186 @@ const ConversationPage = ({ isDarkMode, transition }) => {
     </div>
   );
 
-  const InfoCard = ({ icon, title, content, children, fullWidth = false }) => (
-    <Card
-      className={clsx(
-        "overflow-hidden transition-all duration-300 hover:shadow-lg",
-        isDarkMode ? "bg-gray-800" : "bg-white ",
-        fullWidth && "md:col-span-2"
-      )}
-    >
-      <CardContent className="p-6">
-        <div className="flex items-center mb-3">
-          {React.cloneElement(icon, { className: "w-6 h-6 mr-3" })}
-          <h4 className="font-semibold text-xl flex items-center"> 
-            {title}
-            {children}
-          </h4>
-        </div>
-        {content ? (
-          <ReactMarkdown
-            className={clsx(
-              "text-base",
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            )}
-          >
-            {content}
-          </ReactMarkdown>
-        ) : (
-          children
+  const InfoCard = ({
+    icon,
+    title,
+    content,
+    children,
+    fullWidth = false,
+    colSpan, // Add colSpan prop
+    pdf_link,
+    htm_link,
+  }) => {
+    const handleOpenPdf = () => {
+      if (pdf_link) {
+        window.open(pdf_link, "_blank");
+      }
+    };
+
+    const handleOpenHtm = () => {
+      if (htm_link) {
+        window.open(htm_link, "_blank");
+      }
+    };
+
+    return (
+      <Card
+        className={clsx(
+          "overflow-hidden transition-all duration-300 hover:shadow-lg",
+          isDarkMode ? "bg-gray-800" : "bg-white ",
+          fullWidth && "md:col-span-3",
+          colSpan && `md:col-span-${colSpan}` // Apply colSpan dynamically
         )}
-      </CardContent>
-    </Card>
-  );
-
-  const handleRatingChange = (newRating) => {
-    setRating(newRating);
+      >
+        <CardContent className="p-6">
+          <div className="flex items-center mb-3">
+            {React.cloneElement(icon, { className: "w-6 h-6 mr-3" })}
+            <h4 className="font-semibold text-xl flex items-center mr-4">
+              {title}
+              {children}
+            </h4>
+          </div>
+          {/* Buttons to open PDF and HTML */}
+          {(pdf_link || htm_link) && (
+            <div className="mt-4">
+              {pdf_link && (
+                <div className="mb-2">
+                  <h5 className="font-medium text-lg">PDF:</h5>
+                  <Button variant="outline" onClick={handleOpenPdf}>
+                    Open PDF
+                  </Button>
+                </div>
+              )}
+              {htm_link && (
+                <div>
+                  <h5 className="font-medium text-lg">HTML:</h5>
+                  <Button variant="outline" onClick={handleOpenHtm}>
+                    Open HTML
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          {content && (
+            <ReactMarkdown
+              className={clsx(
+                "text-base",
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              )}
+            >
+              {content}
+            </ReactMarkdown>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
-  const handleSubmitFeedback = () => {
-    // TODO: Implement logic to send feedback to backend or store it
-    console.log("Feedback:", feedback);
-    console.log("Rating:", rating);
-    // Reset form after submission
-    setFeedback("");
-    setRating(0);
+
+  const handleLanguageChange = async (newLanguage) => {
+    setSelectedLanguage(newLanguage);
+    setIsAudioLoading(true); // Show loading immediately
+
+    let newAudioSrc = null; // Store the new audio source URL
+
+    if (newLanguage !== "English" && jsonData && jsonData.audio_path) {
+      // ... (Dubbing logic)
+
+      const audioName = jsonData.audio_path.split("_")[0];
+      const audioUrl = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${jsonData.audio_path}`;
+
+      try {
+        const response = await fetch(
+          "https://wh10lx31-5000.inc1.devtunnels.ms/dub",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              file_url: audioUrl,
+              name: audioName,
+              target_lang: languageCodes[newLanguage],
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === "ok") {
+            const dubbedAudioPath = `${audioName}_${languageCodes[newLanguage]}.mp3`;
+            const dubbedSrtPath = `${audioName}_${languageCodes[newLanguage]}.srt`;
+            newAudioSrc = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${dubbedAudioPath}`;
+            const dubbedSrtUrl = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${dubbedSrtPath}`;
+
+            const srtResponse = await fetch(dubbedSrtUrl, {
+              headers: {
+                "Accept-Charset": "utf-8",
+              },
+            });
+            if (srtResponse.ok) {
+              const srtText = await srtResponse.text();
+              setSubtitles(parseSRT(srtText));
+            } else {
+              console.error(
+                "Error fetching dubbed SRT file:",
+                srtResponse.statusText
+              );
+              setSubtitles([]);
+            }
+          } else {
+            console.error("Dubbing API returned an error:", data);
+          }
+        } else {
+          console.error("Error dubbing audio:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error dubbing audio:", error);
+      } finally {
+        setDubbingInProgress(false);
+        setIsAudioLoading(false);
+      }
+    } else if (newLanguage === "English" && jsonData && jsonData.srt_path) {
+      // Load English subtitles if they exist
+
+      newAudioSrc = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${jsonData.audio_path}`; // English audio URL
+
+      const englishSrtUrl = `https://pub-59da4baaff6649e2a2a64e188046405b.r2.dev/${jsonData.srt_path}`;
+
+      try {
+        const srtResponse = await fetch(englishSrtUrl, {
+          headers: {
+            "Accept-Charset": "utf-8",
+          },
+        });
+        if (srtResponse.ok) {
+          const srtText = await srtResponse.text();
+          setSubtitles(parseSRT(srtText));
+        } else {
+          console.error(
+            "Error fetching English SRT file:",
+            srtResponse.statusText
+          );
+          setSubtitles([]);
+        }
+      } catch (error) {
+        console.error("Error fetching English SRT file:", error);
+        setSubtitles([]);
+      } finally {
+        setIsAudioLoading(false);
+      }
+    } else {
+      // No subtitles available
+      setSubtitles([]);
+    }
+
+    // Set the audio source and reload ONLY ONCE
+    if (newAudioSrc) {
+      audioRef.current.src = newAudioSrc;
+      audioRef.current.load();
+    }
   };
+
 
   return (
     <motion.div
@@ -380,13 +565,17 @@ const ConversationPage = ({ isDarkMode, transition }) => {
       {/* Main content area */}
       <div className="lg:w-2/3 p-6 pt-8 overflow-y-auto">
         {/* Bill/Law/Amendment Details */}
-        <Card className={clsx(
-          "mb-8 overflow-hidden transition-all duration-300",
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        )}>
+        <Card
+          className={clsx(
+            "mb-8 overflow-hidden transition-all duration-300",
+            isDarkMode ? "bg-gray-800" : "bg-white"
+          )}
+        >
           <CardContent className="p-8">
             <div className="flex items-center mb-6">
-              <h2 className="text-4xl font-bold mr-4">{selectedItemData.title}</h2>
+              <h2 className="text-4xl font-bold mr-4">
+                {selectedItemData.title}
+              </h2>
               <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                 {selectedItemData.type}.{selectedItemData.number}
               </span>
@@ -401,7 +590,8 @@ const ConversationPage = ({ isDarkMode, transition }) => {
               </span>
             </div>
 
-            {isDataFetching ? ( // Loading screen for main info card
+            {isDataFetching ? (
+              // Loading screen for main info card
               <div className="text-center p-8">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
                 <p className="mt-4 text-lg">Fetching data...</p>
@@ -421,9 +611,12 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                 </div>
 
                 <div className="space-y-8">
-                  <p className="text-lg text-gray-700 dark:text-gray-300">Fetching data...</p>
+                  <p className="text-lg text-gray-700 dark:text-gray-300">
+                    Fetching data...
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Analysis running for the first time may take up to a minute to load
+                    Analysis running for the first time may take up to a minute
+                    to load
                   </p>
                 </div>
               </div>
@@ -459,11 +652,12 @@ const ConversationPage = ({ isDarkMode, transition }) => {
               Audio Summary
             </h2>
 
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-base text-gray-500 dark:text-gray-400 mb-4">
               Auto Generated by ElevenLabs
             </p>
             <div className="flex-grow flex items-center justify-center">
-              {isAudioLoading ? ( // Loading screen for audio player
+              {isAudioLoading ? (
+                // Loading screen for audio player
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
               ) : isPlaying && showSubtitles ? (
                 <SubtitlesDisplay
@@ -475,23 +669,29 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                 <motion.div
                   className="w-56 h-56 rounded-full flex items-center justify-center"
                   style={{
-                    background: 'radial-gradient(circle at 50% 50%, rgba(135, 206, 250, 0.8), rgba(255, 255, 255, 0))'
+                    background:
+                      "radial-gradient(circle at 50% 50%, rgba(135, 206, 250, 0.8), rgba(255, 255, 255, 0))",
                   }}
                   animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                </motion.div>
-            )}
-          </div>
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                ></motion.div>
+              )}
+            </div>
 
             {/* Subtitle toggle button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowSubtitles(!showSubtitles)}
-              aria-label={showSubtitles ? "Disable Subtitles" : "Enable Subtitles"}
+              aria-label={
+                showSubtitles ? "Disable Subtitles" : "Enable Subtitles"
+              }
               className={clsx(
-                "absolute bottom-6 right-6 transition-colors duration-200",
+                "absolute bottom-2 right-2 transition-colors duration-200",
                 isDarkMode
                   ? "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
                   : "text-gray-600 hover:text-gray-800 hover:bg-gray-200"
@@ -515,7 +715,8 @@ const ConversationPage = ({ isDarkMode, transition }) => {
           style={{ height: "30%" }}
         >
           <CardContent className="p-8 flex flex-col h-full">
-            {isAudioLoading ? ( // Loading screen for player controls
+            {isAudioLoading ? (
+              // Loading screen for player controls
               <div className="flex-grow flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
               </div>
@@ -583,7 +784,7 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                     <FastForward className="h-8 w-8" />
                   </Button>
                 </div>
-                <div className="flex items-center justify-between"> {/* Use justify-between to align items at both ends */}
+                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     {volume === 0 ? (
                       <VolumeX className="h-6 w-6" />
@@ -596,17 +797,51 @@ const ConversationPage = ({ isDarkMode, transition }) => {
                       step={0.01}
                       onValueChange={handleVolumeChange}
                       className="w-[140px]"
-                      disabled={isAudioLoading} // Disable while loading
+                      disabled={isAudioLoading}
                     />
                   </div>
 
                   {/* Language Select */}
-                  <Select onValueChange={setSelectedLanguage} value={selectedLanguage} disabled={isAudioLoading}>
+                  <Select
+                    onValueChange={handleLanguageChange}
+                    value={selectedLanguage}
+                    disabled={isAudioLoading}
+                  >
                     <SelectTrigger className="w-[140px]">
                       <SelectValue placeholder="Select Language" />
                     </SelectTrigger>
                     <SelectContent>
-                      {["English", "Hindi", "Portuguese", "Chinese", "Spanish", "French", "German", "Japanese", "Arabic", "Russian", "Korean", "Indonesian", "Italian", "Dutch", "Turkish", "Polish", "Swedish", "Norwegian", "Filipino", "Malay", "Romanian", "Hungarian", "Ukrainian", "Greek", "Czech", "Danish", "Finnish", "Bulgarian", "Croatian", "Slovak", "Tamil", "Vietnamese"].map((language) => (
+                      {[
+                        "English",
+                        "Chinese",
+                        "Spanish",
+                        "Hindi",
+                        "Portuguese",
+                        "French",
+                        "German",
+                        "Japanese",
+                        "Arabic",
+                        "Russian",
+                        "Korean",
+                        "Indonesian",
+                        "Italian",
+                        "Dutch",
+                        "Turkish",
+                        "Polish",
+                        "Swedish",
+                        "Filipino",
+                        "Malay",
+                        "Romanian",
+                        "Ukrainian",
+                        "Greek",
+                        "Czech",
+                        "Danish",
+                        "Finnish",
+                        "Bulgarian",
+                        "Croatian",
+                        "Slovak",
+                        "Tamil",
+                      ].map((language) => (
                         <SelectItem key={language} value={language}>
                           {language}
                         </SelectItem>

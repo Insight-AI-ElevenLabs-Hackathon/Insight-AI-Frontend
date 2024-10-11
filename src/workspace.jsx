@@ -7,9 +7,7 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import Sidebar from "./Sidebar";
-import ProfilePopup from "./ProfilePopup";
 import FooterPopup from "./FooterPopup";
 import {
   ChevronLeft,
@@ -19,17 +17,10 @@ import {
   Scale,
   Calendar,
   Building2,
+  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConversationPage from "./ConversationPage";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-} from "@clerk/clerk-react";
-import InputArea from "./InputArea";
 
 // Create a context to store the selected bill/law/amendment data
 export const SelectedItemDataContext = createContext(null);
@@ -38,17 +29,11 @@ const WorkspaceContent = () => {
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
   );
-  const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [showFooterPopup, setShowFooterPopup] = useState(false);
   const [footerPopupContent, setFooterPopupContent] = useState("");
   const [selectedItemData, setSelectedItemData] = useState(null); // State for selected item data
-  const profilePopupRef = useRef(null);
   const footerPopupRef = useRef(null);
   const location = useLocation();
-
-  const toggleProfilePopup = useCallback(() => {
-    setShowProfilePopup((prevState) => !prevState);
-  }, []);
 
   const toggleDarkMode = useCallback(() => {
     setIsDarkMode((prevMode) => !prevMode);
@@ -70,12 +55,6 @@ const WorkspaceContent = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        profilePopupRef.current &&
-        !profilePopupRef.current.contains(event.target)
-      ) {
-        setShowProfilePopup(false);
-      }
       if (
         footerPopupRef.current &&
         !footerPopupRef.current.contains(event.target)
@@ -104,68 +83,51 @@ const WorkspaceContent = () => {
       >
         <Header isDarkMode={isDarkMode} />
         <main className="flex-grow flex overflow-hidden mt-12 pl-[60px]">
-          <SignedIn>
-            <Sidebar
-              isDarkMode={isDarkMode}
-              toggleProfilePopup={toggleProfilePopup}
-            />
-            <div className="flex-grow overflow-y-auto">
-              <AnimatePresence mode="wait">
-                <Routes>
-                  <Route
-                    path="/"
-                    element={<HomePage isDarkMode={isDarkMode} />}
-                  />
-                  <Route
-                    path="/conversation/:id"
-                    element={<ConversationPage isDarkMode={isDarkMode} />}
-                  />
-                </Routes>
-              </AnimatePresence>
-            </div>
-          </SignedIn>
-          <SignedOut>
-            <SignOutContent />
-          </SignedOut>
+          <Sidebar
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+          />
+          <div className="flex-grow overflow-y-auto">
+            <AnimatePresence mode="wait">
+              <Routes>
+                <Route
+                  path="/"
+                  element={<HomePage isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="/conversation/:id"
+                  element={<ConversationPage isDarkMode={isDarkMode} />}
+                />
+              </Routes>
+            </AnimatePresence>
+          </div>
         </main>
 
-        <SignedIn>
-          {isHomePage && (
-            <div
-              className={`mt-auto p-2 text-center text-sm ${
-                isDarkMode ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {["FAQ", "Terms", "AI Policy", "Privacy", "Insight AI →"].map(
-                (link) => (
-                  <a
-                    key={link}
-                    href="#"
-                    className={`mx-2 hover:underline cursor-pointer ${
-                      isDarkMode
-                        ? "text-gray-400 hover:text-gray-200"
-                        : "text-gray-600 hover:text-gray-800"
-                    }`}
-                    onClick={() => openFooterPopup(link)}
-                  >
-                    {link}
-                  </a>
-                )
-              )}
-            </div>
-          )}
-        </SignedIn>
-
-        {showProfilePopup && (
-          <div ref={profilePopupRef}>
-            <ProfilePopup
-              isDarkMode={isDarkMode}
-              toggleDarkMode={toggleDarkMode}
-              toggleProfilePopup={toggleProfilePopup}
-              showProfilePopup={showProfilePopup}
-            />
+        {isHomePage && (
+          <div
+            className={`mt-auto p-2 text-center text-sm ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            {["FAQ", "Terms", "AI Policy", "Privacy", "Insight AI →"].map(
+              (link) => (
+                <a
+                  key={link}
+                  href="#"
+                  className={`mx-2 hover:underline cursor-pointer ${
+                    isDarkMode
+                      ? "text-gray-400 hover:text-gray-200"
+                      : "text-gray-600 hover:text-gray-800"
+                  }`}
+                  onClick={() => openFooterPopup(link)}
+                >
+                  {link}
+                </a>
+              )
+            )}
           </div>
         )}
+
         {showFooterPopup && (
           <div ref={footerPopupRef}>
             <FooterPopup
@@ -188,11 +150,7 @@ const WorkspaceContent = () => {
 const Workspace = () => {
   return (
     <Router>
-      <ClerkProvider
-        publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
-      >
-        <WorkspaceContent />
-      </ClerkProvider>
+      <WorkspaceContent /> 
     </Router>
   );
 };
@@ -217,16 +175,6 @@ const Header = React.memo(({ isDarkMode }) => (
 const HomePage = React.memo(({ isDarkMode }) => {
   const navigate = useNavigate();
   const { setSelectedItemData } = useContext(SelectedItemDataContext);
-
-  const handleSubmit = useCallback(
-    (inputValue, uploadedFiles) => {
-      const conversationId = uuidv4();
-      // Save conversation ID to localStorage
-      localStorage.setItem("conversationId", conversationId);
-      navigate(`/conversation/${conversationId}`);
-    },
-    [navigate]
-  );
 
   // State to manage the visible cards and data for each section
   const [visibleBills, setVisibleBills] = useState([0, 1, 2, 3]);
@@ -284,10 +232,10 @@ const HomePage = React.memo(({ isDarkMode }) => {
   // Modified InfoCard onClick handler
   const handleInfoCardClick = async (data) => {
     try {
-      const response = await fetch('https://uid-generator.insight-ai.workers.dev/', { // Replace with your worker route
+      const response = await fetch('https://uid-generator.insight-ai.workers.dev/', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: JSON.stringify(data) }),
+        body: JSON.stringify({ url: data.url }),
       });
 
       if (response.ok) {
@@ -297,7 +245,6 @@ const HomePage = React.memo(({ isDarkMode }) => {
         navigate(`/conversation/${uid}`);
       } else {
         console.error('Error generating UID:', response.status);
-        // Handle error appropriately (e.g., show an error message to the user)
       }
     } catch (error) {
       console.error('Error generating UID:', error);
@@ -380,7 +327,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
           multiple languages.
         </motion.p>
         <div className="w-full max-w-2xl">
-          <InputArea isDarkMode={isDarkMode} onSubmit={handleSubmit} />
+          <InputArea isDarkMode={isDarkMode} /> 
         </div>
       </div>
 
@@ -425,7 +372,7 @@ const HomePage = React.memo(({ isDarkMode }) => {
                     }}
                     icon={FileText}
                     isDarkMode={isDarkMode}
-                    data={bill} // Pass the entire bill object
+                    data={bill} 
                   />
                 )
             )}
@@ -485,16 +432,391 @@ const HomePage = React.memo(({ isDarkMode }) => {
   );
 });
 
+// InputArea Component
+const InputArea = ({ isDarkMode }) => {
+  const [inputValue, setInputValue] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [timeRange, setTimeRange] = useState("");
+  const [billNumber, setBillNumber] = useState("");
+  const [originHouse, setOriginHouse] = useState("");
+  const [docType, setDocType] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const formRef = useRef(null);
+  const navigate = useNavigate();
+  const { setSelectedItemData } = useContext(SelectedItemDataContext);
 
-const SignOutContent = () => (
-  <div className="flex-grow p-8 flex flex-col items-center justify-center">
-    <h1 className="text-4xl font-medium mb-4">Welcome to Insight AI</h1>
-    <p className="text-gray-600 mb-8">Please sign in or sign up to continue.</p>
-    <div className="space-x-4">
-      <SignInButton />
-      <SignUpButton />
-    </div>
-  </div>
-);
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setIsLoading(true); // Set isLoading to true when submitting
 
-export default Workspace;
+      try {
+        const response = await fetch(
+          "https://search.insight-ai.workers.dev/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: inputValue,
+              time_range: timeRange,
+              origin: originHouse,
+              doc_type: docType,
+              bill_number: billNumber,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data);
+        } else {
+          console.error("Error fetching search results:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+      } finally {
+        setIsLoading(false);
+        setShowPopup(true);
+      }
+    },
+    [inputValue, timeRange, billNumber, originHouse, docType]
+  );
+
+  const handleResultClick = async (result) => {
+    setIsLoading(true); // Start loading
+
+    try {
+      // 1. Generate a UID for the conversation first
+      const uidResponse = await fetch('https://uid-generator.insight-ai.workers.dev/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: result.resultLink }),
+      });
+
+      if (uidResponse.ok) {
+        const { uid } = await uidResponse.json();
+
+        // 2. Parse the search result into the InfoCard format
+        const parsedResult = {
+          title: result.title,
+          congress: result.packageId.split('-')[1].slice(0, 3), // Extract congress from packageId (e.g., "118" from "BILLS-118hr9773ih")
+          number: result.packageId.split('-').pop().replace(/[^0-9]/g, ''), // Extract number from packageId (e.g., "9773" from "BILLS-118hr9773ih")
+          type: result.origin === "House" ? "HR" : "S", // Assuming "origin" field maps to "type"
+          updateDate: result.lastModified.split('T')[0], // Extract date from lastModified
+          url: result.resultLink,
+        };
+
+        // 3. Set selected item data using the parsed result
+        setSelectedItemData(parsedResult);
+
+        // 4. Navigate to the conversation page
+        navigate(`/conversation/${uid}`);
+
+        // 5. Fetch additional data in ConversationPage (as before)
+      } else {
+        console.error('Error generating UID:', uidResponse.status);
+        // Handle error appropriately
+      }
+    } catch (error) {
+      console.error('Error handling search result click:', error);
+      // Handle error appropriately
+    } finally {
+      setIsLoading(false); // Stop loading
+      setShowPopup(false);
+    }
+  };
+
+  const handleFocus = () => {
+    setShowFilters(true);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (formRef.current && !formRef.current.contains(event.target)) {
+        setShowFilters(false);
+        setShowPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="w-full max-w-3xl relative">
+      <motion.form
+        ref={formRef}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        onSubmit={handleSubmit}
+        className={`rounded-lg shadow-lg border overflow-hidden ${
+          isDarkMode
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-300"
+        }`}
+      >
+        <div
+          className={`flex items-center p-4 rounded-t-lg ${
+            isDarkMode ? "bg-gray-800" : "bg-white"
+          }`}
+        >
+          <input
+            type="text"
+            placeholder="Full Text Search..."
+            className={`flex-grow focus:outline-none px-3 py-2 ${
+              isDarkMode
+                ? "text-gray-300 bg-gray-800"
+                : "text-gray-700 bg-white"
+            } text-base`}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onFocus={handleFocus}
+          />
+          <motion.button
+            type="submit"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`ml-4 px-4 py-2 rounded-md text-sm font-medium flex items-center ${
+              isDarkMode
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <Search className="w-4 h-4 mr-2" />
+            )}
+            {isLoading ? "Loading..." : "Search"}
+          </motion.button>
+        </div>
+
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              key="filterSection"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className={`p-4 overflow-hidden rounded-b-lg ${
+                isDarkMode ? "bg-gray-700" : "bg-gray-100"
+              }`}
+            >
+              <div className="grid grid-cols-2 gap-4 py-2">
+                {/* Row 1 */}
+                <div className="flex items-center space-x-3">
+                  <label
+                    htmlFor="timeRange"
+                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Time :
+                  </label>
+                  <select
+                    id="timeRange"
+                    value={timeRange}
+                    onChange={(e) => setTimeRange(e.target.value)}
+                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      isDarkMode
+                        ? "bg-gray-600 text-gray-300 border-gray-500"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                  >
+                    <option value="">Select Time Range</option>
+                    <option value="1m">1 Month</option>
+                    <option value="3m">3 Months</option>
+                    <option value="6m">6 Months</option>
+                    <option value="12m">12 Months</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <label
+                    htmlFor="billNumber"
+                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    <FileText className="w-4 h-4 mr-1" />
+                    Number:
+                  </label>
+                  <input
+                    type="text"
+                    id="billNumber"
+                    value={billNumber}
+                    onChange={(e) => setBillNumber(e.target.value)}
+                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      isDarkMode
+                        ? "bg-gray-600 text-gray-300 border-gray-500"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                    placeholder="Bill/Law number"
+                  />
+                </div>
+
+                {/* Row 2 */}
+                <div className="flex items-center space-x-3">
+                  <label
+                    htmlFor="originHouse"
+                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4 mr-1" />
+                    Origin:
+                  </label>
+                  <select
+                    id="originHouse"
+                    value={originHouse}
+                    onChange={(e) => setOriginHouse(e.target.value)}
+                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      isDarkMode
+                        ? "bg-gray-600 text-gray-300 border-gray-500"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                  >
+                    <option value="">Select Origin</option>
+                    <option value="House">House</option>
+                    <option value="Senate">Senate</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <label
+                    htmlFor="docType"
+                    className={`flex items-center text-sm font-medium whitespace-nowrap ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    <Scale className="w-4 h-4 mr-1" />
+                    Type:
+                  </label>
+                  <select
+                    id="docType"
+                    value={docType}
+                    onChange={(e) => setDocType(e.target.value)}
+                    className={`flex-grow px-3 py-2 text-sm rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      isDarkMode
+                        ? "bg-gray-600 text-gray-300 border-gray-500"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Bill">Bill</option>
+                    <option value="Law">Law</option>
+                    {/* Add more document types as needed */}
+                  </select>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.form>
+
+      <AnimatePresence>
+        {showPopup && (
+          <motion.div
+            key="searchPopup"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className={`w-full max-w-3xl p-8 rounded-lg shadow-lg bg-white overflow-y-auto max-h-[80vh] ${
+                isDarkMode
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-gray-300"
+              }`}
+            >
+              <h2
+                className={`text-2xl font-semibold mb-6 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-800"
+                }`}
+              >
+                Search Results
+              </h2>
+              {isLoading && (
+                <div className="flex justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+                </div>
+              )}
+              {!isLoading && searchResults.map((result) => (
+                <motion.div
+                  key={result.packageId}
+                  whileHover={{ scale: 1.02 }}
+                  className={`px-6 py-4 cursor-pointer border-b group ${
+                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                  }`}
+                  onClick={async () => { // Use async function here
+                    console.log("Result passed to onClick:", result);
+                    await handleResultClick(result); // Await handleResultClick
+                    setShowPopup(false);
+                  }}
+                >
+                  <h3
+                    className={`text-xl font-medium mb-2 transition-colors group-hover:text-blue-500 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-800"
+                    }`}
+                  >
+                    {result.title}
+                  </h3>
+                  <p
+                    className={`text-base ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    {result.dateIssued && (
+                      <span>
+                        <strong>Date Issued:</strong> {result.dateIssued}
+                      </span>
+                    )}
+                  </p>
+                  {result.origin && (
+                    <span className="block text-sm text-gray-500 mt-1">
+                      <strong>Origin:</strong> {result.origin}
+                    </span>
+                  )}
+                  {result.docType && (
+                    <span className="block text-sm text-gray-500 mt-1">
+                      <strong>Type:</strong> {result.docType}
+                    </span>
+                  )}
+                </motion.div>
+              ))}
+              <button
+                className={`mt-6 px-6 py-3 rounded-md text-base font-medium ${
+                  isDarkMode
+                    ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+                onClick={() => setShowPopup(false)}
+                ></button>
+                <button>
+                  Close
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+  
+  export default Workspace; 

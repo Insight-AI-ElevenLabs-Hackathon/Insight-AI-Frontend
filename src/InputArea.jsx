@@ -19,7 +19,7 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-      setIsLoading(true);
+      setIsLoading(true); // Set isLoading to true when submitting
 
       try {
         const response = await fetch(
@@ -55,9 +55,33 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
     [inputValue, timeRange, billNumber, originHouse, docType]
   );
 
-  const handleResultClick = (resultId) => {
-    navigate(`/conversation/${resultId}`);
-    setShowPopup(false);
+  const handleResultClick = async (result) => {
+    setIsLoading(true); // Start loading
+
+    if (result.resultLink) {
+      try {
+        console.log("Encoded URL:", encodeURIComponent(result.resultLink)); // Log encoded URL
+        const response = await fetch(
+          `https://wh10lx31-5000.inc1.devtunnels.ms/info/${encodeURIComponent(result.resultLink)}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("API Response Data:", data); // Log the API response data
+          navigate(`/conversation/${data.uid}`); 
+        } else {
+          console.error("Error fetching UID:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching UID:", error);
+      } finally {
+        setIsLoading(false); // Stop loading
+        setShowPopup(false);
+      }
+    } else {
+      console.error("Result URL is undefined:", result);
+      setIsLoading(false);
+    }
   };
 
   const handleFocus = () => {
@@ -118,9 +142,14 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-blue-100 text-blue-700 hover:bg-blue-200"
             }`}
+            disabled={isLoading} 
           >
-            <Search className="w-4 h-4 mr-2" />
-            Search
+            {isLoading ? ( 
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <Search className="w-4 h-4 mr-2" />
+            )}
+            {isLoading ? "Loading..." : "Search"} 
           </motion.button>
         </div>
 
@@ -290,7 +319,8 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                     isDarkMode ? "border-gray-700" : "border-gray-200"
                   }`}
                   onClick={() => {
-                    handleResultClick(result.packageId);
+                    console.log("Result passed to onClick:", result);
+                    handleResultClick(result);
                     setShowPopup(false);
                   }}
                 >
@@ -306,17 +336,12 @@ const InputArea = ({ isDarkMode, onSubmit }) => {
                       isDarkMode ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    {/* You might want to display more relevant information here */}
-                    {/* For example: result.dateIssued, result.governmentAuthor, etc. */}
-                    {/* Adjust based on the data you want to show */}
-                    {/* Example: */}
                     {result.dateIssued && (
                       <span>
                         <strong>Date Issued:</strong> {result.dateIssued}
                       </span>
                     )}
                   </p>
-                  {/* You can add more details here based on your data */}
                   {result.origin && (
                     <span className="block text-sm text-gray-500 mt-1">
                       <strong>Origin:</strong> {result.origin}
